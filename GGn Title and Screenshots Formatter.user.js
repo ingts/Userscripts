@@ -2,7 +2,7 @@
 // @name         GGn Title and Screenshots Formatter
 // @namespace    none
 // @version      21
-// @description  Formats title, sets alias if applicable and has buttons to undo. Removes screenshots until they are a multiple of 4
+// @description  Formats title, sets alias if applicable and has buttons to undo. Removes screenshots until they are a multiple of 4. Adds buttons in edit page to format name and alias. Exposes title case function to other scripts
 // @author       ingts
 // @match        https://gazellegames.net/upload.php
 // @match        https://gazellegames.net/torrents.php?action=editgroup&groupid=*
