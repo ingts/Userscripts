@@ -1,24 +1,16 @@
 // ==UserScript==
 // @name         GGn Title and Screenshots Formatter
 // @namespace    none
-// @version      20
+// @version      21
 // @description  Formats title, sets alias if applicable and has buttons to undo. Removes screenshots until they are a multiple of 4
 // @author       ingts
 // @match        https://gazellegames.net/upload.php
+// @match        https://gazellegames.net/torrents.php?action=editgroup&groupid=*
 // @exclude      https://gazellegames.net/upload.php?*
 // @grant        unsafeWindow
 // ==/UserScript==
 
-let titleInput = document.getElementById('title')
-
-// changing the category changes the form using a server request and the title input is replaced
-document.getElementById('categories').addEventListener('change', () => {
-    new MutationObserver((mutations, observer) => {
-        titleInput = document.getElementById('title')
-        observer.disconnect()
-    }).observe(document.getElementById('upload_table'), {childList: true, subtree: true})
-})
-
+let titleInput
 const globals = unsafeWindow.TitleAndScreenshotsFormatter = {}
 globals.toTitleCase = function (str, alias) {
     const japaneseLowercase = new Map([
@@ -150,23 +142,46 @@ function startTextFormat(wait) {
     }, 500)
 }
 
-startTextFormat(true)
+if (location.href.endsWith('upload.php')) {
+    titleInput = document.getElementById('title')
+
+    // changing the category changes the form using a server request and the title input is replaced
+    document.getElementById('categories').addEventListener('change', () => {
+        new MutationObserver((mutations, observer) => {
+            titleInput = document.getElementById('title')
+            observer.disconnect()
+        }).observe(document.getElementById('upload_table'), {childList: true, subtree: true})
+    })
+    startTextFormat(true)
 
 
-const screenshotInputs = document.getElementsByName('screens[]')
-const removeButton = document.querySelector("#image_block > a:nth-of-type(2)")
-const sInterval = setInterval(() => {
-    for (let i = 0; i < screenshotInputs.length; i++) {
-        if (!screenshotInputs[i].value) {
-            return
+    const screenshotInputs = document.getElementsByName('screens[]')
+    const removeButton = document.querySelector("#image_block > a:nth-of-type(2)")
+    const sInterval = setInterval(() => {
+        for (let i = 0; i < screenshotInputs.length; i++) {
+            if (!screenshotInputs[i].value) {
+                return
+            }
         }
-    }
-    const number = screenshotInputs.length < 4 ? screenshotInputs.length : Math.min(Math.floor(screenshotInputs.length / 4) * 4, 20)
-    while (screenshotInputs.length > number) {
-        removeButton.click()
-    }
-    clearInterval(sInterval)
-}, 1000)
-document.querySelector("#image_block > a:nth-of-type(1)").addEventListener('click', () => {
-    clearInterval(sInterval)
-})
+        const number = screenshotInputs.length < 4 ? screenshotInputs.length : Math.min(Math.floor(screenshotInputs.length / 4) * 4, 20)
+        while (screenshotInputs.length > number) {
+            removeButton.click()
+        }
+        clearInterval(sInterval)
+    }, 1000)
+    document.querySelector("#image_block > a:nth-of-type(1)").addEventListener('click', () => {
+        clearInterval(sInterval)
+    })
+} else {
+    const aliasesInput = document.querySelector('input[name=aliases]')
+    aliasesInput.insertAdjacentHTML('afterend', `<button type="button" id="tf-button-alias">Format</button>`)
+    document.getElementById('tf-button-alias').addEventListener('click', () => {
+        aliasesInput.value = globals.toTitleCase(aliasesInput.value, aliasesInput.value)
+    })
+
+    const titleInput = document.querySelector("input[name=name]")
+    titleInput.insertAdjacentHTML('afterend', `<button type="button" id="tf-button-title">Format</button>`)
+    document.getElementById('tf-button-title').addEventListener('click', () => {
+        titleInput.value = globals.toTitleCase(titleInput.value, aliasesInput.value)
+    })
+}
