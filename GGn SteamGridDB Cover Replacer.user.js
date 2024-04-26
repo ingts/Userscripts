@@ -2,7 +2,7 @@
 // @name         GGn SteamGridDB Cover Replacer
 // @namespace    none
 // @version      1
-// @description  .
+// @description  Easily replace cover using SteamGridDB images
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
 // @grant        GM_xmlhttpRequest
