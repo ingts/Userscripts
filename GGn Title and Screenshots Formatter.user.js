@@ -1,16 +1,17 @@
 // ==UserScript==
 // @name         GGn Title and Screenshots Formatter
 // @namespace    none
-// @version      21
+// @version      22
 // @description  Formats title, sets alias if applicable and has buttons to undo. Removes screenshots until they are a multiple of 4. Adds buttons in edit page to format name and alias. Exposes title case function to other scripts
 // @author       ingts
 // @match        https://gazellegames.net/upload.php
+// @match        https://gazellegames.net/torrents.php?id=*
 // @match        https://gazellegames.net/torrents.php?action=editgroup&groupid=*
 // @exclude      https://gazellegames.net/upload.php?*
 // @grant        unsafeWindow
 // ==/UserScript==
 
-let titleInput
+let titleInput, aliasInput
 const globals = unsafeWindow.TitleAndScreenshotsFormatter = {}
 globals.toTitleCase = function (str, alias) {
     const japaneseLowercase = new Map([
@@ -79,10 +80,10 @@ globals.toTitleCase = function (str, alias) {
 
 function formatText() {
     let origTitle = titleInput.value
-    const aliases = document.getElementById('aliases')
-    let origAlias = aliases.value
+    aliasInput = document.getElementById('aliases')
+    let origAlias = aliasInput.value
 
-    let titleAfterTitleCase = globals.toTitleCase(titleInput.value, aliases.value)
+    let titleAfterTitleCase = globals.toTitleCase(titleInput.value, aliasInput.value)
     titleInput.value = titleAfterTitleCase
 
     if (document.getElementById('categories').value === 'Games') {
@@ -91,10 +92,10 @@ function formatText() {
 
         if (excluded) {
             if (excluded.length === 1) {
-                aliases.value ? aliases.value += ', ' + excluded.join('') : aliases.value = excluded.join('')
+                aliasInput.value ? aliasInput.value += ', ' + excluded.join('') : aliasInput.value = excluded.join('')
                 titleInput.value = titleInput.value.replace(excludePattern, "").trim()
             } else {
-                aliases.value ? aliases.value += ', ' + titleInput.value : titleInput.value
+                aliasInput.value ? aliasInput.value += ', ' + titleInput.value : titleInput.value
                 titleInput.value = ''
                 startTextFormat(false)
                 return
@@ -102,7 +103,7 @@ function formatText() {
         }
     }
 
-    if (titleAfterTitleCase !== origTitle || aliases.value !== origAlias) {
+    if (titleAfterTitleCase !== origTitle || aliasInput.value !== origAlias) {
         document.querySelector("#title_tr > td.label").insertAdjacentHTML('beforeend', `<span style="color: #ebaf51;display: block;">Undo Title Formatter</span>
     <div id="tf-undo-buttons"></div>`)
 
@@ -117,13 +118,13 @@ function formatText() {
             }
             buttonDiv.append(button1)
         }
-        if (aliases.value !== origAlias) {
+        if (aliasInput.value !== origAlias) {
             const button2 = document.createElement('button')
             button2.textContent = 'Alias'
             button2.type = 'button'
             button2.onclick = () => {
                 titleInput.value = titleAfterTitleCase
-                aliases.value = origAlias
+                aliasInput.value = origAlias
             }
             buttonDiv.append(button2)
         }
@@ -140,6 +141,16 @@ function startTextFormat(wait) {
             setTimeout(formatText, 2000)
         } else formatText()
     }, 500)
+}
+
+function addButton(input, alias = aliasInput.value) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.textContent = 'Format'
+    button.addEventListener('click', () => {
+        input.value = globals.toTitleCase(input.value, alias)
+    })
+    input.after(button)
 }
 
 if (location.href.endsWith('upload.php')) {
@@ -172,16 +183,18 @@ if (location.href.endsWith('upload.php')) {
     document.querySelector("#image_block > a:nth-of-type(1)").addEventListener('click', () => {
         clearInterval(sInterval)
     })
+} else if (location.href.includes('editgroup')) {
+    titleInput = document.querySelector("input[name=name]")
+    aliasInput = document.querySelector('input[name=aliases]')
+    addButton(aliasInput)
+    addButton(titleInput)
 } else {
-    const aliasesInput = document.querySelector('input[name=aliases]')
-    aliasesInput.insertAdjacentHTML('afterend', `<button type="button" id="tf-button-alias">Format</button>`)
-    document.getElementById('tf-button-alias').addEventListener('click', () => {
-        aliasesInput.value = globals.toTitleCase(aliasesInput.value, aliasesInput.value)
-    })
+    const editHelperRename = document.getElementById('titleEdit')
 
-    const titleInput = document.querySelector("input[name=name]")
-    titleInput.insertAdjacentHTML('afterend', `<button type="button" id="tf-button-title">Format</button>`)
-    document.getElementById('tf-button-title').addEventListener('click', () => {
-        titleInput.value = globals.toTitleCase(titleInput.value, aliasesInput.value)
-    })
+    if (editHelperRename) {
+        editHelperRename.addEventListener('click', () => {
+            titleInput = document.querySelector("input[name=name]")
+            addButton(titleInput, document.getElementById('group_aliases')?.childNodes[2])
+        })
+    }
 }
