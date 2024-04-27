@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Title and Screenshots Formatter
 // @namespace    none
-// @version      22
+// @version      23
 // @description  Formats title, sets alias if applicable and has buttons to undo. Removes screenshots until they are a multiple of 4. Adds buttons in edit page to format name and alias. Exposes title case function to other scripts
 // @author       ingts
 // @match        https://gazellegames.net/upload.php
@@ -44,7 +44,7 @@ globals.toTitleCase = function (str, alias) {
 
     return str
         .replace(/\s/g, ' ')
-        .replace(/ ~ /, ': ').replace(/ ~/, ': ').replace(/~$/, '').replace(/ ~$/, '').replace(/ - /, ': ').replace(/ -/, ': ').replace(/-$/, '')
+        .replace(/ ~ /, ': ').replace(/ ~/, ': ').replace(/~$/, '').replace(/ ~$/, '').replace(/ - /, ': ').replace(/ -/, ': ').replace(/-$/, '').replace(/^-/, '')
         .replace('™', '').replace('®', '')
         .toLowerCase().trim()
         .split(wordSeparators)
@@ -143,7 +143,7 @@ function startTextFormat(wait) {
     }, 500)
 }
 
-function addButton(input, alias = aliasInput.value) {
+function addButton(input, alias = aliasInput?.value ?? '') {
     const button = document.createElement('button')
     button.type = 'button'
     button.textContent = 'Format'
@@ -189,12 +189,15 @@ if (location.href.endsWith('upload.php')) {
     addButton(aliasInput)
     addButton(titleInput)
 } else {
-    const editHelperRename = document.getElementById('titleEdit')
+    // wait to make sure the editor helper loads first
+    setTimeout(() => {
+        const editHelperRename = document.getElementById('titleEdit')
 
-    if (editHelperRename) {
-        editHelperRename.addEventListener('click', () => {
-            titleInput = document.querySelector("input[name=name]")
-            addButton(titleInput, document.getElementById('group_aliases')?.childNodes[2])
-        })
-    }
+        if (editHelperRename) {
+            editHelperRename.addEventListener('click', () => {
+                titleInput = document.querySelector("input[name=name]")
+                addButton(titleInput, document.getElementById('group_aliases')?.childNodes[2])
+            })
+        }
+    }, 80)
 }
