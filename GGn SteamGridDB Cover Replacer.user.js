@@ -35,7 +35,6 @@ function main() {
 function loadTitles(groupName, response) {
     if (!response.response.success) alert('SteamGridDB request failed')
     const data = response.response.data
-    console.log(data)
     if (data.length === 0) alert('No results')
     document.getElementById('grouplinks').insertAdjacentHTML('afterend',
         // language=HTML
@@ -46,7 +45,7 @@ function loadTitles(groupName, response) {
             </section>
         `)
     const container = document.getElementById('sgdb-cover')
-    if (!Array.isArray(data) || data.length === 1) {
+    if (!Array.isArray(data)) {
         getImages(data, container)
     } else {
         const titleMatch = data.find(item => item.name === groupName)
@@ -68,7 +67,6 @@ function loadTitles(groupName, response) {
 }
 
 function getImages(item, container) {
-    console.log(item)
     GM_xmlhttpRequest({
         url: `https://www.steamgriddb.com/api/v2/grids/game/${item.id}?types=static`,
         headers: {
