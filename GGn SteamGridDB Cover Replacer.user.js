@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn SteamGridDB Cover Replacer
 // @namespace    none
-// @version      1
+// @version      2
 // @description  Easily replace cover using SteamGridDB images
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -15,27 +15,27 @@ GM_registerMenuCommand('Run', main)
 
 function main() {
     const steamLink = document.querySelector('a[title=Steam]')
+    const groupName = / - (.*) \(\d+\) \[.*]/.exec(document.getElementById('groupplatform').nextSibling.textContent)[1]
     GM_xmlhttpRequest({
         url: "https://www.steamgriddb.com/api/v2/" +
-        (steamLink
-            ? `games/steam/${/\d+/.exec(steamLink.href)[0]}`
-            : `search/autocomplete/%22${encodeURIComponent(/ - (.*) \(\d+\) \[.*]/.exec(document.getElementById('groupplatform').nextSibling.textContent)[1])}%22`),
+            (steamLink
+                ? `games/steam/${/\d+/.exec(steamLink.href)[0]}`
+                : `search/autocomplete/%22${encodeURIComponent(groupName)}%22`),
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${API_key}`
         },
         responseType: "json",
         onload: response => {
-            loadTitles(steamLink, response)
+            loadTitles(groupName, response)
         }
     })
 }
 
-
-
-function loadTitles(steamLink, response) {
+function loadTitles(groupName, response) {
     if (!response.response.success) alert('SteamGridDB request failed')
     const data = response.response.data
+    console.log(data)
     if (data.length === 0) alert('No results')
     document.getElementById('grouplinks').insertAdjacentHTML('afterend',
         // language=HTML
@@ -48,8 +48,12 @@ function loadTitles(steamLink, response) {
     const container = document.getElementById('sgdb-cover')
     if (!Array.isArray(data) || data.length === 1) {
         getImages(data, container)
-    }
-    else {
+    } else {
+        const titleMatch = data.find(item => item.name === groupName)
+        if (titleMatch) {
+            getImages(titleMatch, container)
+            return
+        }
         data.forEach(item => {
             const button = document.createElement('button')
             button.textContent = item.name
@@ -64,6 +68,7 @@ function loadTitles(steamLink, response) {
 }
 
 function getImages(item, container) {
+    console.log(item)
     GM_xmlhttpRequest({
         url: `https://www.steamgriddb.com/api/v2/grids/game/${item.id}?types=static`,
         headers: {
@@ -80,7 +85,7 @@ function loadImages(container, response) {
     if (response.response.data.length === 0) alert('No results')
     const sorted = response.response.data.sort((a, b) => b.upvotes - a.upvotes)
 
-    for (let i = 0; i < Math.min(sorted.length, max_images); i++){
+    for (let i = 0; i < Math.min(sorted.length, max_images); i++) {
         const item = sorted[i]
         new Promise(resolve => {
             let img = new Image()
@@ -101,12 +106,12 @@ function loadImages(container, response) {
             div.insertAdjacentHTML('beforeend', `<span style="font-size: 1.4em;">${item.width} x ${item.height}</span>`)
             div.append(img)
             img.addEventListener('click', () => {
-                img.style.border = '5px solid gray'
+                img.style.outline = '5px solid gray'
                 fetch(`https://gazellegames.net/imgup.php?img=${item.url}`)
-                    .then(r=> r.text())
+                    .then(r => r.text())
                     .then(link => {
                         const body = new URLSearchParams(`action=takeimagesedit&groupid=${new URL(location.href).searchParams.get('id')}&categoryid=1&image=${link}`)
-                        Array.from(document.querySelectorAll('#group_screenshots a')).map(a => a.href).forEach(url => body.append('screens[]', url))
+                        document.querySelectorAll('#group_screenshots a').forEach(a => body.append('screens[]', a.href))
                         fetch('torrents.php', {
                             method: 'post',
                             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -116,7 +121,7 @@ function loadImages(container, response) {
                                 if (!(r.ok && r.redirected)) {
                                     throw Error
                                 }
-                                img.style.borderColor = 'green'
+                                img.style.outlineColor = 'lightgreen'
                             })
                             .catch(() => {
                                 img.style.removeProperty('border')
