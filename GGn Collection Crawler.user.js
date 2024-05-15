@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.10.1
+// @version      1.0.10.2
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -199,7 +199,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name (as of 2024-04-08)
+    // every theme collection except those with GGn in the name (as of 2024-05-08)
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -1359,6 +1359,7 @@ async function main() {
         [85, 3041], // Gothic Lolita
         [157, 11751], // Trance/Suggestion
         [139, 11754], // Secret Fondling
+        [46, 11769], // Harem
         [444, 11770], // Time Stopping
     ])
 
