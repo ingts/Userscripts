@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.2.7
+// @version      1.2.8
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -688,8 +688,16 @@ function searchSites(groupname, encodedGroupname) {
         }
     })
 
-    searchAndAddElements('googleplayuri', 'a[href^="/store/apps"]')
-
+    searchAndAddElements('googleplayuri', (r, tr, ld) => {
+        const doc = parseDoc(r)
+        const anchors = doc.querySelectorAll('a[href^="/store/apps"]')
+        throwNotFound(anchors)
+        for (let i = 0; i < Math.min(max_results, anchors.length); i++) {
+            setAnchorProperties(addElementsToRow(tr, ld, i),
+                findTextNode(anchors[i]) || findTextNode(anchors[i].nextElementSibling.querySelector('img').nextElementSibling),
+                getFullURLFromAnchor(r, anchors[i]))
+        }
+    })
     searchAndAddElements('nintendouri', googleSearchSelector, `https://www.google.com/search?q=site:*nintendo.com OR site:*nintendo.co.uk OR site:*nintendo.co.jp AND inurl:JP OR inurl:ja OR inurl:Games OR inurl:games OR inurl:list ${encodedGroupname}`)
 
     searchAndAddElements('rpggeekuri', 'a.primary')
