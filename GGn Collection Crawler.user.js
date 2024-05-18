@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.10.2
+// @version      1.0.11
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2360,11 +2360,16 @@ async function main() {
     if (websites.get("Wikipedia")) {
         function wikipediaAdd(td, addTo) {
             const list = td.querySelector('div.plainlist')
+            let text
             if (list) {
                 list.querySelectorAll('li').forEach(li => {
-                    addTo.add(li.textContent)
+                    text = li.textContent.replace(/[\[(].*?[\])]/g, '')
+                    addTo instanceof Set ? addTo.add(text) : addTo = text
                 })
-            } else addTo.add(td.textContent)
+            } else {
+                text = td.textContent.replace(/[\[(].*?[\])]/g, '')
+                addTo instanceof Set ? addTo.add(text) : addTo = text
+            }
         }
 
         processURL("Wikipedia", (r, sitename) => {
