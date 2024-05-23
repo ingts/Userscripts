@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.2.8
+// @version      1.2.9
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -35,11 +35,11 @@ let auto_search = GM_getValue('auto_search')
 const max_results = GM_getValue('max_results')
 const isEditPage = location.href.includes('editgroup')
 
-// review site arrays: name, search url, score input id, score input max, score input text, url input id
+// review site arrays: name, search url, score input id, score input max, step, urlinputid
 const reviewSites = [
-    ["Metascore", "https://www.metacritic.com/search/NAME?category=13&page=1", "meta", "100", "metauri"],
-    ["IGN", "https://www.google.com/search?q=site:ign.com/articles+NAME%20review", "ignscore", "10", "ignuri"],
-    ["GameSpot", "https://www.gamespot.com/search/?i=reviews&q=NAME", "gamespotscore", "10", "gamespotscoreuri"],
+    ["Metascore", "https://www.metacritic.com/search/NAME?category=13&page=1", "meta", "100", "1", "metauri"],
+    ["IGN", "https://www.google.com/search?q=site:ign.com/articles+NAME%20review", "ignscore", "10", "0.1", "ignuri"],
+    ["GameSpot", "https://www.gamespot.com/search/?i=reviews&q=NAME", "gamespotscore", "10", "0.1", "gamespotscoreuri"],
 ]
 
 // site arrays: name, search url, input id, input pattern
@@ -292,7 +292,7 @@ async function runGroup() {
     setAlternateNames(groupname)
 
     if (platform) {
-        reviewSites.forEach(([name, searchurl, scoreinputid, scoreinputmax, urlinputid]) => {
+        reviewSites.forEach(([name, searchurl, scoreinputid, scoreinputmax, step, urlinputid]) => {
             const ratingDiv = document.querySelector(`.ratings.${scoreinputid.replace('score', '')}`)
             reviewsBody.insertAdjacentHTML('beforeend',
                 // language=HTML
@@ -302,7 +302,7 @@ async function runGroup() {
                             <a href=${searchurl.replace('NAME', encodedGroupname)}>Search</a>
                         </td>
                         <td>
-                            <input type="number" id=${scoreinputid} name=${scoreinputid} min="0" max=${scoreinputmax}
+                            <input type="number" id=${scoreinputid} name=${scoreinputid} min="0" max=${scoreinputmax} step=${step}
                                    value=${ratingDiv?.firstElementChild.textContent ?? ''}> / ${scoreinputmax}
                             <input type="url" id=${urlinputid} name=${urlinputid}
                                    value=${ratingDiv?.parentElement.href ?? ''}>
