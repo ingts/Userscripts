@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.11
+// @version      1.0.11.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -508,6 +508,9 @@ async function main() {
         [11754, "Chikan"],
         [11769, "Harem"],
         [11770, "Time Stop"],
+        [11800, "Set in a Death Game/Battle Royale"],
+        [11801, "Combat Sex"],
+        [11805, "Incest"],
     ])
 
     // every feature collection (as of 2023-12-05)
@@ -1361,6 +1364,7 @@ async function main() {
         [139, 11754], // Secret Fondling
         [46, 11769], // Harem
         [444, 11770], // Time Stopping
+        [533, 11801], // Battle Fuck
     ])
 
     const DlsiteThemesExtra = new Map([
@@ -1634,6 +1638,65 @@ async function main() {
         [1017, 11769], // Unavoidable Harem Ending
 
         [1364, 11770], // Time Stop
+        [664, 11800], // Battle Royale
+
+        [1341, 11805], // Blood-related Aunt/Nephew Incest
+        [1698, 11805], // Blood-related Brother/Brother Incest
+        [92, 11805], // Blood-related Brother/Sister Incest
+        [3330, 11805], // Blood-related Cousin Incest
+        [391, 11805], // Blood-related Father/Daughter Incest
+        [1697, 11805], // Blood-related Father/Son Incest
+        [1421, 11805], // Blood-related Grandmother/Grandson Incest
+        [947, 11805], // Blood-related Mother/Daughter Incest
+        [532, 11805], // Blood-related Mother/Son Incest
+        [91, 11805], // Blood-related Sister/Sister Incest
+        [1522, 11805], // Blood-related Uncle/Niece Incest
+        [1296, 11805], // Twincest
+        [1942, 11805], // Non-blood-related Brother/Brother Incest
+        [95, 11805], // Non-blood-related Brother/Sister Incest
+        [1318, 11805], // Non-blood-related Father/Daughter Incest
+        [3239, 11805], // Non-blood-related Father/Son Incest
+        [1693, 11805], // Non-blood-related Mother/Daughter Incest
+        [652, 11805], // Non-blood-related Mother/Son Incest
+        [94, 11805], // Non-blood-related Sister/Sister Incest
+        [3237, 11805], // Non-blood-related Uncle/Niece Incest
+        [1189, 11805], // Brother/Brother Incest
+        [1698, 11805], // Blood-related Brother/Brother Incest
+        [1942, 11805], // Non-blood-related Brother/Brother Incest
+        [89, 11805], // Brother/Sister Incest
+        [92, 11805], // Blood-related Brother/Sister Incest
+        [95, 11805], // Non-blood-related Brother/Sister Incest
+        [1702, 11805], // Father/Daughter Incest
+        [391, 11805], // Blood-related Father/Daughter Incest
+        [1318, 11805], // Non-blood-related Father/Daughter Incest
+        [1708, 11805], // Father/Son Incest
+        [1697, 11805], // Blood-related Father/Son Incest
+        [3239, 11805], // Non-blood-related Father/Son Incest
+        [1703, 11805], // Mother/Daughter Incest
+        [947, 11805], // Blood-related Mother/Daughter Incest
+        [1693, 11805], // Non-blood-related Mother/Daughter Incest
+        [1704, 11805], // Mother/Son Incest
+        [532, 11805], // Blood-related Mother/Son Incest
+        [652, 11805], // Non-blood-related Mother/Son Incest
+        [90, 11805], // Sister/Sister Incest
+        [91, 11805], // Blood-related Sister/Sister Incest
+        [94, 11805], // Non-blood-related Sister/Sister Incest
+        [1705, 11805], // Uncle/Niece Incest
+        [1522, 11805], // Blood-related Uncle/Niece Incest
+        [3237, 11805], // Non-blood-related Uncle/Niece Incest
+        [1706, 11805], // Aunt/Nephew Incest
+        [1341, 11805], // Blood-related Aunt/Nephew Incest
+        [414, 11805], // Cousin Incest
+        [3330, 11805], // Blood-related Cousin Incest
+        [1707, 11805], // Grandmother/Grandson Incest
+        [1421, 11805], // Blood-related Grandmother/Grandson Incest
+        [3305, 11805], // Aunt/Niece Incest
+        [1821, 11805], // Grandfather/Granddaughter Incest
+        [2206, 11805], // Grandfather/Grandson Incest
+        [992, 11805], // Inbreeding
+        [3319, 11805], // In-law Incest
+        [1809, 11805], // Unbeknown Incest
+        [2031, 11805], // Uncle/Nephew Incest
     ])
 
     const vndbThemesExtra = new Map([
@@ -1955,6 +2018,7 @@ async function main() {
     /** @type {Set<?number>} collection ids */
     const foundThemes = new Set(), foundFeatures = new Set()
 
+    /** @type {String} */
     let foundSeries = ''
 
     /** @type {Set<?string>} */
