@@ -199,7 +199,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name (as of 2024-05-08)
+    // every theme collection except those with GGn in the name (as of 2024-06-30)
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
