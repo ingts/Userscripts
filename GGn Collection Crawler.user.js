@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.11.1
+// @version      1.0.11.2
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -174,13 +174,13 @@ async function main() {
         || (officialSiteLink?.includes('dlsite') && DLsiteCodePattern.exec(officialSiteLink)[0])
 
     const websites = new Map([
-        ["DLsite", DLsiteCode],
-        ["Steam", document.querySelector("a[title=Steam]")],
-        ["itch.io", document.querySelector("a[title=Itch]")],
+        // ["DLsite", DLsiteCode],
+        // ["Steam", document.querySelector("a[title=Steam]")],
+        // ["itch.io", document.querySelector("a[title=Itch]")],
         ["MobyGames", document.querySelector("a[title=MobyGames]")],
-        ["PCGamingWiki", document.querySelector("a[title=PCGamingWiki]")],
-        ["Wikipedia", document.querySelector("a[title=Wikipedia]")],
-        ["VNDB", document.querySelector("a[title=VNDB]")],
+        // ["PCGamingWiki", document.querySelector("a[title=PCGamingWiki]")],
+        // ["Wikipedia", document.querySelector("a[title=Wikipedia]")],
+        // ["VNDB", document.querySelector("a[title=VNDB]")],
     ])
 
     let noLink = true
@@ -199,7 +199,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name (as of 2024-06-30)
+    // every theme collection except those with GGn in the name (as of 2024-07-23)
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -511,6 +511,7 @@ async function main() {
         [11800, "Set in a Death Game/Battle Royale"],
         [11801, "Combat Sex"],
         [11805, "Incest"],
+        [11811, "Love Triangle"]
     ])
 
     // every feature collection (as of 2023-12-05)
@@ -981,7 +982,7 @@ async function main() {
         [11576, "Modern Art"]
     ]
 
-    // every engine collection (as of 2024-01-18)
+    // every engine collection (as of 2024-07-23)
     const enginesMap = new Map([
         ["Creation Engine", 175],
         ["ScummVM", 199],
@@ -1207,6 +1208,7 @@ async function main() {
         ["Solar2D", 11458],
         ["VOCALOID", 11523],
         ["Divinity Engine", 11613],
+        ["mTropolis", 11815]
     ])
 
     const steamThemes = new Map([
@@ -1365,6 +1367,7 @@ async function main() {
         [46, 11769], // Harem
         [444, 11770], // Time Stopping
         [533, 11801], // Battle Fuck
+        [519 ,10392], // 異世界転生
     ])
 
     const DlsiteThemesExtra = new Map([
@@ -1697,6 +1700,10 @@ async function main() {
         [3319, 11805], // In-law Incest
         [1809, 11805], // Unbeknown Incest
         [2031, 11805], // Uncle/Nephew Incest
+
+        [336, 11811], // Love Triangle
+        [337, 11811], // Dramatic Love Triangle
+        [338, 11811], // Comedic Love Triangle
     ])
 
     const vndbThemesExtra = new Map([
@@ -2196,14 +2203,12 @@ async function main() {
             addAllStrings(getLowercaseTextFromElements(doc, '#developerLinks a'), foundDevelopers, sitename)
             let groups = Array.from(doc.querySelectorAll('.badge.text-ellipsis a'))
             for (const a of groups) {
-                if (['Engine:', 'Middleware:'].some(str => a.textContent.includes(str))) {
+                if (['engine:', 'middleware:'].some(str => a.textContent.toLowerCase().includes(str))) {
                     foundEngines.add(a.textContent.replace(/^.*?: /, '')) // remove text before first colon and space
-                    groups.pop()
                     continue
                 }
                 if (a.textContent.includes('series')) {
                     foundSeries = a.textContent.replace('series', '').trim()
-                    groups.pop()
                 }
             }
             addCollectionIds(groups.map(a => /\d+/.exec(a.href)[0]), mobygamesThemes_Groups, foundThemes, true)
