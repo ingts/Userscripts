@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.12
+// @version      1.0.13
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2183,8 +2183,10 @@ async function main() {
             addCollectionIds(tags, itchioThemes, foundThemes)
             addCollectionIds(tags, itchioFeatures, foundFeatures)
 
-            const author = getNodeByXPath(doc, ".//table//td[text()='Author']").nextElementSibling.textContent
-            foundDevelopers.add(author)
+            const authors = getNodeByXPath(doc, ".//table//td[contains(text(), 'Author')]").nextElementSibling
+            authors.querySelectorAll('a').forEach(a => {
+                foundDevelopers.add(a.textContent)
+            })
 
             const madeWithTd = getNodeByXPath(doc, ".//table//td[text()='Made with']")
             if (madeWithTd) {
@@ -2775,6 +2777,7 @@ async function main() {
 
     insertHeader('Developers')
     for (const devname of foundDevelopers) {
+        let found
         if (foundPublishers.has(devname))
             foundPublishers.delete(devname)
 
@@ -2783,10 +2786,13 @@ async function main() {
                 if (category === 'Publisher') {
                     publishers.push([id, name])
                 } else if (category === 'Developer') {
+                    found = true
                     insertLabel(id, name)
-                } else notFound.add(devname)
+                }
             })
         })
+        if (!found)
+            notFound.add(devname)
     }
     insertNotFound()
 
