@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.11.2
+// @version      1.0.12
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -174,13 +174,13 @@ async function main() {
         || (officialSiteLink?.includes('dlsite') && DLsiteCodePattern.exec(officialSiteLink)[0])
 
     const websites = new Map([
-        // ["DLsite", DLsiteCode],
-        // ["Steam", document.querySelector("a[title=Steam]")],
-        // ["itch.io", document.querySelector("a[title=Itch]")],
+        ["DLsite", DLsiteCode],
+        ["Steam", document.querySelector("a[title=Steam]")],
+        ["itch.io", document.querySelector("a[title=Itch]")],
         ["MobyGames", document.querySelector("a[title=MobyGames]")],
-        // ["PCGamingWiki", document.querySelector("a[title=PCGamingWiki]")],
-        // ["Wikipedia", document.querySelector("a[title=Wikipedia]")],
-        // ["VNDB", document.querySelector("a[title=VNDB]")],
+        ["PCGamingWiki", document.querySelector("a[title=PCGamingWiki]")],
+        ["Wikipedia", document.querySelector("a[title=Wikipedia]")],
+        ["VNDB", document.querySelector("a[title=VNDB]")],
     ])
 
     let noLink = true
