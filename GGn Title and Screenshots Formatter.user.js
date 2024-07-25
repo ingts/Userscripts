@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Title and Screenshots Formatter
 // @namespace    none
-// @version      23
+// @version      24
 // @description  Formats title, sets alias if applicable and has buttons to undo. Removes screenshots until they are a multiple of 4. Adds buttons in edit page to format name and alias. Exposes title case function to other scripts
 // @author       ingts
 // @match        https://gazellegames.net/upload.php
@@ -39,7 +39,7 @@ globals.toTitleCase = function (str, alias) {
 
     const smallWords = /^(a|an|and|as|at|but|by|en|for|if|in|nor|of|on|or|per|the|to|v.?|vs.?|via)$/i
     const alphanumericPattern = /([A-Za-z0-9\u00C0-\u00FF])/
-    const wordSeparators = /([ :–—-]|[^a-zA-Z0-9'])/
+    const wordSeparators = /([ :–—-]|[^a-zA-Z0-9'’])/
     const allUppercase = new Set(['rpg', 'fps', 'tps', 'rts', 'tbs', 'mmo', 'mmorpg', 'arpg', 'jrpg', 'pvp', 'pve', 'ntr', 'td', 'vr', 'npc'])
 
     return str
@@ -87,7 +87,7 @@ function formatText() {
     titleInput.value = titleAfterTitleCase
 
     if (document.getElementById('categories').value === 'Games') {
-        const excludePattern = /[^a-zA-Z0-9 .~?!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/]+/g
+        const excludePattern = /[^a-zA-Z0-9 .~?’!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/]+/g
         let excluded = titleInput.value.match(excludePattern)
 
         if (excluded) {
