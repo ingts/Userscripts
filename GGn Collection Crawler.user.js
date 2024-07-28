@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.13
+// @version      1.0.13.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -199,7 +199,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name (as of 2024-07-23)
+    // every theme collection except those with GGn in the name (as of 2024-07-28)
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -511,7 +511,9 @@ async function main() {
         [11800, "Set in a Death Game/Battle Royale"],
         [11801, "Combat Sex"],
         [11805, "Incest"],
-        [11811, "Love Triangle"]
+        [11808, "Games Based on The Bible"],
+        [11811, "Love Triangle"],
+        [11820, "Prehistory"],
     ])
 
     // every feature collection (as of 2023-12-05)
@@ -1837,6 +1839,8 @@ async function main() {
         ["turn-based", 3813],
         ["turn-based strategy (tbs)", 3813],
         ["turn-based tactics (tbt)", 3813],
+
+        ["prehistoric", 5515],
     ])
 
     // IDs are in the url
@@ -1909,6 +1913,9 @@ async function main() {
         [17440, 11355], // Kinetic visual novels
         [15477, 11386], // Console Generation Exclusives: Sega Saturn
         [10860, 11519], // My Little Pony fangames
+
+        [9013, 11808], // Bible educational games
+        [5165, 11808], // Wisdom Tree's Bible-themed games
     ])
 
     // https://www.mobygames.com/attributes/tech-specs
@@ -1995,6 +2002,7 @@ async function main() {
         ["World War II", 673],
         ["World War I", 3025],
         ["Zombies", 586],
+        ["Prehistoric", 11820],
     ])
 
     // Local means same device but doesn't specify if it's split screen
