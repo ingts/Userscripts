@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         GGn Title and Screenshots Formatter
 // @namespace    none
-// @version      24
+// @version      25
 // @description  Formats title, sets alias if applicable and has buttons to undo. Removes screenshots until they are a multiple of 4. Adds buttons in edit page to format name and alias. Exposes title case function to other scripts
 // @author       ingts
 // @match        https://gazellegames.net/upload.php
 // @match        https://gazellegames.net/torrents.php?id=*
 // @match        https://gazellegames.net/torrents.php?action=editgroup&groupid=*
-// @exclude      https://gazellegames.net/upload.php?*
+// @match        https://gazellegames.net/upload.php?action=copy&groupid=*
+// @exclude      https://gazellegames.net/upload.php?groupid=*
 // @grant        unsafeWindow
 // ==/UserScript==
 
@@ -153,15 +154,16 @@ function addButton(input, alias = aliasInput?.value ?? '') {
     input.after(button)
 }
 
-if (location.href.endsWith('upload.php')) {
+if (location.href.includes('upload.php')) {
     titleInput = document.getElementById('title')
 
     // changing the category changes the form using a server request and the title input is replaced
     document.getElementById('categories').addEventListener('change', () => {
         new MutationObserver((mutations, observer) => {
             titleInput = document.getElementById('title')
+            startTextFormat(true)
             observer.disconnect()
-        }).observe(document.getElementById('upload_table'), {childList: true, subtree: true})
+        }).observe(document.getElementById('dynamic_form'), {childList: true, subtree: true})
     })
     startTextFormat(true)
 
