@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.2.11
+// @version      1.2.12
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -177,7 +177,7 @@ if (isEditPage) {
 
 } else {
     const groupDetails = document.getElementById('content')
-    if (groupDetails) {
+    if (groupDetails && !document.querySelector("#group_nofo_bigdiv > div.head").textContent.includes("Application")) {
         platform = document.getElementById('groupplatform')?.textContent
         GM_setValue('platform', platform ?? undefined)
         GM_registerMenuCommand('Run', () => {
@@ -653,7 +653,7 @@ function searchSites(groupname, encodedGroupname) {
             const {game_id, game_name} = data[i]
             setAnchorProperties(addElementsToRow(tr, ld, i), game_name, `https://howlongtobeat.com/game/${game_id}`)
         }
-    }, 'https://howlongtobeat.com/api/search', {
+    }, 'https://howlongtobeat.com/api/search/4b4cbe570602c88660f7df8ea0cb6b6e', {
         method: 'POST',
         headers: {
             referer: 'https://howlongtobeat.com',
