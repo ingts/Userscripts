@@ -1708,6 +1708,9 @@ async function main() {
         [336, 11811], // Love Triangle
         [337, 11811], // Dramatic Love Triangle
         [338, 11811], // Comedic Love Triangle
+
+        [3684, 11829], // AI-generated Assets
+        [3663, 11829], // AI-generated Graphics
     ])
 
     const vndbThemesExtra = new Map([
