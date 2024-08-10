@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.13.1
+// @version      1.0.13.2
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -199,7 +199,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name (as of 2024-07-28)
+    // every theme collection except those with GGn in the name (as of 2024-08-10)
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -514,6 +514,8 @@ async function main() {
         [11808, "Games Based on The Bible"],
         [11811, "Love Triangle"],
         [11820, "Prehistory"],
+        [11829, "AI Generated Art"],
+        [11830, "Asset Flip"],
     ])
 
     // every feature collection (as of 2023-12-05)
@@ -2108,11 +2110,12 @@ async function main() {
 
     if (websites.get("DLsite")) {
         processURL("DLsite", r => {
-            const {genres, maker_name, maker_name_en, site_id} = r.response[0]
+            const {genres, maker_name, maker_name_en, site_id, options} = r.response[0]
             const maker = maker_name_en || maker_name // en can be null
             const genreIds = genres.map(i => i.id)
             if (site_id === "girls") foundThemes.add(3035) // Otome
             if (site_id === "bl") foundThemes.add(3033) // Yaoi
+            if (options.includes("AIP")) foundThemes.add(11829) // AI Generated Art
             addCollectionIds(genreIds, DLsiteThemes, foundThemes, true, DlsiteThemesExtra)
             addCollectionIds(genreIds, DLsiteFeatures, foundFeatures, true)
             foundDevelopers.add(maker)
