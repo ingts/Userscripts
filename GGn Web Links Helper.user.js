@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.2.12
+// @version      1.2.13
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -302,8 +302,9 @@ async function runGroup() {
                             <a href=${searchurl.replace('NAME', encodedGroupname)}>Search</a>
                         </td>
                         <td>
-                            <input type="number" id=${scoreinputid} name=${scoreinputid} min="0" max=${scoreinputmax} step=${step}
-                                   value=${ratingDiv?.firstElementChild.textContent ?? ''}> / ${scoreinputmax}
+                            <input type="number" id=${scoreinputid} name=${scoreinputid} min="0" max=${scoreinputmax}
+                                   step=${step} value=${ratingDiv?.firstElementChild.textContent ?? ''}>
+                            / ${scoreinputmax}
                             <input type="url" id=${urlinputid} name=${urlinputid}
                                    value=${ratingDiv?.parentElement.href ?? ''}>
                         </td>
@@ -316,6 +317,7 @@ async function runGroup() {
         ['itchuri', 'Itch'],
         ['rpgneturi', 'RPGnet']
     ])
+
     function insertRows(sites) {
         sites.forEach(([name, url, id, pattern]) => {
             const title = specialTitles.get(id)
@@ -402,7 +404,7 @@ async function runGroup() {
 
 function setAlternateNames(groupname) {
     encodedGroupname = encodeURIComponent(groupname)
-    groupnameFirstWord = groupname.replace(/[ :].*/,'')
+    groupnameFirstWord = groupname.replace(/[ :].*/, '')
 }
 
 function addUncheckButton(form) {
@@ -642,28 +644,11 @@ function searchSites(groupname, encodedGroupname) {
             throw Error('notfound', {cause: 'notfound'})
         }
         setAnchorProperties(addElementsToRow(tr, ld),
-            el.href ? el.textContent : el.querySelector('th').textContent, el.href ? getFullURLFromAnchor(r, el) : r.finalUrl)
+            el.href ? el.textContent : el.querySelector('th').textContent, el.href ? getFullURL(r, el) : r.finalUrl)
     })
     searchAndAddElements('giantbomburi', ['li.media a', 'li.media a p.specs'])
     searchVNDB(groupname)
-    searchAndAddElements('howlongtobeaturi', (r, tr, ld) => {
-        const data = r.response.data
-        if (data.length < 1) throw Error('notfound', {cause: 'notfound'})
-        for (let i = 0; i < Math.min(max_results, data.length); i++) {
-            const {game_id, game_name} = data[i]
-            setAnchorProperties(addElementsToRow(tr, ld, i), game_name, `https://howlongtobeat.com/game/${game_id}`)
-        }
-    }, 'https://howlongtobeat.com/api/search/4b4cbe570602c88660f7df8ea0cb6b6e', {
-        method: 'POST',
-        headers: {
-            referer: 'https://howlongtobeat.com',
-            'Content-Type': 'application/json'
-        },
-        responseType: "json",
-        data: JSON.stringify({
-            searchTerms: groupname.split(' ')
-        })
-    })
+    searchHLTB(groupname)
 
     searchAndAddElements('amazonuri', '.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
     searchAndAddElements('gamefaqsuri', ['.sr_name > a', '.sr_info'])
@@ -695,7 +680,7 @@ function searchSites(groupname, encodedGroupname) {
         for (let i = 0; i < Math.min(max_results, anchors.length); i++) {
             setAnchorProperties(addElementsToRow(tr, ld, i),
                 findTextNode(anchors[i]) || findTextNode(anchors[i].nextElementSibling.querySelector('img').nextElementSibling),
-                getFullURLFromAnchor(r, anchors[i]))
+                getFullURL(r, anchors[i]))
         }
     })
     searchAndAddElements('nintendouri', googleSearchSelector, `https://www.google.com/search?q=site:*nintendo.com OR site:*nintendo.co.uk OR site:*nintendo.co.jp AND inurl:JP OR inurl:ja OR inurl:Games OR inurl:games OR inurl:list ${encodedGroupname}`)
@@ -713,7 +698,7 @@ function searchSites(groupname, encodedGroupname) {
         {responseType: "json"})
 
     searchAndAddElements('boardgamegeekuri', ['a.primary', '.smallerfont.dull'])
-    
+
     searchAndAddElements('vgmdburi', (r, tr, ld) => {
         const doc = parseDoc(r)
         const anchors = doc.querySelectorAll('a.albumtitle')
@@ -737,6 +722,36 @@ function searchSites(groupname, encodedGroupname) {
 
     searchAndAddElements('googleplaybooksuri', 'a:has(div.Epkrse')
     searchAndAddElements('goodreadsuri', ['.bookTitle', '.authorName'])
+}
+
+function searchHLTB(groupname) {
+    promiseXHR("https://howlongtobeat.com/")
+        .then(r => {
+            const doc = parseDoc(r)
+            const script = doc.querySelector("script[src*=_app]")
+            promiseXHR(`${getFullURL(r, script)}`).then(r => {
+                const path = /"\/api\/search\/"\.concat\("([^"]+)"\)/.exec(r.responseText)?.[1]
+
+                searchAndAddElements('howlongtobeaturi', (r, tr, ld) => {
+                    const data = r.response.data
+                    if (data.length < 1) throw Error('notfound', {cause: 'notfound'})
+                    for (let i = 0; i < Math.min(max_results, data.length); i++) {
+                        const {game_id, game_name} = data[i]
+                        setAnchorProperties(addElementsToRow(tr, ld, i), game_name, `https://howlongtobeat.com/game/${game_id}`)
+                    }
+                }, `https://howlongtobeat.com/api/search/${path ?? ''}`, {
+                    method: 'POST',
+                    headers: {
+                        referer: 'https://howlongtobeat.com',
+                        'Content-Type': 'application/json'
+                    },
+                    responseType: "json",
+                    data: JSON.stringify({
+                        searchTerms: groupname.split(' ')
+                    })
+                })
+            })
+        })
 }
 
 async function searchVNDB(groupname) {
@@ -881,18 +896,18 @@ async function findGameFaqsPlatformPage(url, platform, input) {
         ["Watara Supervision", "SuperVision"],
         ["Retro - Other", null],
     ])
-        const pageResponse = await promiseXHR(url)
-        const doc = parseDoc(pageResponse)
-        const platformName = doc.querySelector('span.header_more').textContent.trim()
-        const matchedPlatform = gamefaqsPlatformMap.get(platform)
-        if (matchedPlatform && matchedPlatform === platformName) {
-            input.value = url
-            return
-        }
-        const platformLinks = doc.querySelectorAll('#header_more_menu a')
-        const platformLink = Array.from(platformLinks).find(a => matchedPlatform === a.textContent.trim())
-        if (!platformLink) return
-        input.value = getFullURLFromAnchor(pageResponse, platformLink)
+    const pageResponse = await promiseXHR(url)
+    const doc = parseDoc(pageResponse)
+    const platformName = doc.querySelector('span.header_more').textContent.trim()
+    const matchedPlatform = gamefaqsPlatformMap.get(platform)
+    if (matchedPlatform && matchedPlatform === platformName) {
+        input.value = url
+        return
+    }
+    const platformLinks = doc.querySelectorAll('#header_more_menu a')
+    const platformLink = Array.from(platformLinks).find(a => matchedPlatform === a.textContent.trim())
+    if (!platformLink) return
+    input.value = getFullURL(pageResponse, platformLink)
 }
 
 const parser = new DOMParser()
@@ -960,7 +975,7 @@ function searchAndAddElements(id, selectorsOrFunction, url, options) {
                         }
                     }
                     const anchor = addElementsToRow(tr, loading, i)
-                    setAnchorProperties(anchor, text, getFullURLFromAnchor(res, selectedAnchors[i]))
+                    setAnchorProperties(anchor, text, getFullURL(res, selectedAnchors[i]))
                 }
             }
         })
@@ -993,9 +1008,9 @@ function findTextNode(node) {
     return null
 }
 
-function getFullURLFromAnchor(response, anchor) {
-    const href = anchor.href
-    return href.startsWith('https://gazellegames') ? (new URL(response.finalUrl).origin + href).replace('https://gazellegames.net', '') : href
+function getFullURL(response, element) {
+    const link = element.href ?? element.src
+    return link.startsWith('https://gazellegames') ? (new URL(response.finalUrl).origin + link).replace('https://gazellegames.net', '') : link
 }
 
 function promiseXHR(url, options) {
