@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.13.2
+// @version      1.0.14
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2114,11 +2114,11 @@ async function main() {
     if (websites.get("DLsite")) {
         processURL("DLsite", r => {
             const {genres, maker_name, maker_name_en, site_id, options} = r.response[0]
-            const maker = maker_name_en || maker_name // en can be null
+            const maker = maker_name_en ?? maker_name
             const genreIds = genres.map(i => i.id)
             if (site_id === "girls") foundThemes.add(3035) // Otome
             if (site_id === "bl") foundThemes.add(3033) // Yaoi
-            if (options.includes("AIP")) foundThemes.add(11829) // AI Generated Art
+            if (options?.includes("AIP")) foundThemes.add(11829) // AI Generated Art
             addCollectionIds(genreIds, DLsiteThemes, foundThemes, true, DlsiteThemesExtra)
             addCollectionIds(genreIds, DLsiteFeatures, foundFeatures, true)
             foundDevelopers.add(maker)
