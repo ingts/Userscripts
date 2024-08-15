@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.2.13
+// @version      1.3
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
+// @match        https://gazellegames.net/torrents.php?action=editgroup&groupid=*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_registerMenuCommand
 // @grant        GM_unregisterMenuCommand
@@ -23,6 +24,8 @@ if (typeof GM_getValue('max_results') === 'undefined')
     GM_setValue('max_results', 2)
 if (typeof GM_getValue('auto_search') === 'undefined')
     GM_setValue('auto_search', true)
+if (typeof GM_getValue('auto_search_reviews') === 'undefined')
+    GM_setValue('auto_search_reviews', true)
 if (typeof GM_getValue('check_first_word') === 'undefined')
     GM_setValue('check_first_word', true)
 if (typeof GM_getValue('refresh_after_submit') === 'undefined') {
@@ -126,23 +129,28 @@ GM_addStyle( // language=css
             margin: 15px auto;
         }
     `)
-
-let groupname = ''
-let encodedGroupname = ''
-let groupnameFirstWord = ''
-let platform = ''
+let groupname = '', encodedGroupname = '', groupnameFirstWord = '', platform = '', isAdult = false
 
 if (isEditPage) {
     platform = GM_getValue('platform')
+    isAdult = GM_getValue('isAdult')
     GM_deleteValue('platform')
+    GM_deleteValue('isAdult')
     groupname = document.querySelector('h2 a').textContent
     setAlternateNames(groupname)
 
+    let reviewsTable
     if (platform) {
-        const reviews = document.getElementById('reviews_table').firstElementChild
-        reviews.style.display = 'flex'
-        reviews.style.flexDirection = 'column'
+        reviewsTable = document.getElementById('reviews_table').firstElementChild
+        reviewsTable.style.display = 'flex'
+        reviewsTable.style.flexDirection = 'column'
+        reviewsTable.insertAdjacentHTML('afterbegin', `
+    <button type="button" id="wlhelper-search-all">Search All</button>`)
+    } else {
+        document.querySelector('input[name=year]').insertAdjacentHTML('afterend', `
+    <button type="button" id="wlhelper-search-all">Search All</button>`)
     }
+
     const links = document.getElementById('weblinks_edit').firstElementChild
     const form = links.closest('form')
 
@@ -168,9 +176,7 @@ if (isEditPage) {
     changeHrefs(commonPcSites)
     changeHrefs(windowsAndMacSites)
 
-    document.querySelector('input[name=year]').insertAdjacentHTML('afterend', `
-<button type="button" id="wlhelper-search-all">Search All</button>`)
-    addSearchHandler(form)
+    addSearchAllButtonHandler(form, reviewsTable)
 
     addCheckboxesInputHandler(form)
     addSubmitHandler(form)
@@ -179,7 +185,10 @@ if (isEditPage) {
     const groupDetails = document.getElementById('content')
     if (groupDetails && !document.querySelector("#group_nofo_bigdiv > div.head").textContent.includes("Application")) {
         platform = document.getElementById('groupplatform')?.textContent
+        isAdult = !!document.querySelector("#tagslist a[href*='adult']")
         GM_setValue('platform', platform ?? undefined)
+        GM_setValue('isAdult', isAdult)
+
         GM_registerMenuCommand('Run', () => {
             runGroup()
         })
@@ -275,7 +284,7 @@ async function runGroup() {
                     <table>
                         <tbody id="wlhelper-links"></tbody>
                     </table>
-                    <input type="submit">
+                        <input type="submit" style="margin-right: 15px;">
                 </form>
             </section>
         `)
@@ -392,12 +401,17 @@ async function runGroup() {
 
     const form = document.querySelector('#wlhelper form')
     if (auto_search) {
-        if (platform) searchReviews()
+        if (GM_getValue('auto_search_reviews') && platform) {
+            if (isAdult)
+                insertAdultPresentText(reviewsBody)
+            else searchReviews()
+        }
         searchSites(groupname, encodedGroupname)
         addUncheckButton(form)
+        addUncheckButton(form, reviewsBody)
+    } else {
+        addSearchAllButtonHandler(form, reviewsBody)
     }
-
-    addSearchHandler(form)
     addCheckboxesInputHandler(section)
     addSubmitHandler(form, groupTitleParts)
 }
@@ -407,23 +421,25 @@ function setAlternateNames(groupname) {
     groupnameFirstWord = groupname.replace(/[ :].*/, '')
 }
 
-function addUncheckButton(form) {
-    const submitBtn = form.querySelector('input[type=submit]')
+function addUncheckButton(form, reviews) {
     const unchecker = document.createElement('button')
     unchecker.type = 'button'
-    unchecker.textContent = 'Uncheck All'
-    unchecker.style.cssText = `margin-right: 10px;    
+    unchecker.textContent = `Uncheck ${reviews ? 'Reviews' : 'All'}`
+    unchecker.style.cssText = `margin-right: 5px;    
     padding: 5px;
     height: 30px;`
-
     unchecker.onclick = () => {
-        form.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false)
+        (reviews ?? form).querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false)
     }
-    const div = document.createElement('div')
-    div.append(unchecker)
-    div.append(submitBtn)
-    div.style.cssText = `margin: 15px auto 0 auto;width: max-content;`
-    form.append(div)
+
+    const submitBtn = form.querySelector('input[type=submit]')
+    if (submitBtn.parentElement.tagName !== 'DIV') {
+        const div = document.createElement('div')
+        div.append(submitBtn)
+        div.style.cssText = `margin: 15px auto 0 auto;width: max-content;`
+        form.append(div)
+    }
+    submitBtn.parentElement.append(unchecker)
 }
 
 function addSubmitHandler(form, groupTitleParts) {
@@ -575,16 +591,21 @@ function addSubmitHandler(form, groupTitleParts) {
     })
 }
 
-function addSearchHandler(form) {
-    if (auto_search) return
+function addSearchAllButtonHandler(form, reviews) {
     document.getElementById('wlhelper-search-all').onclick = e => {
         e.target.disabled = true
-        if (document.getElementById('reviews_table') && !platform) {
-            alert('Platform not found. Go to the group page to retrieve it')
-            return
-        }
+
         if (platform) {
-            searchReviews()
+            if (isAdult) insertAdultPresentText(reviews)
+            else {
+                searchReviews()
+                addUncheckButton(form, reviews)
+            }
+        } else {
+            if (isEditPage && reviews) { // if the platform wasn't retrieved but is editing a game group
+                alert('Platform not found. Go to the group page to retrieve it')
+                return
+            }
         }
         searchSites(groupname, encodedGroupname)
         addUncheckButton(form)
@@ -607,6 +628,10 @@ function addCheckboxesInputHandler(elem) {
 
 
 const googleSearchSelector = '#search a:has(h3)'
+
+function insertAdultPresentText(reviewsBody) {
+    reviewsBody.insertAdjacentHTML('afterend', `<p style="color:antiquewhite;">Group is tagged adult: skipped searching reviews</p>`)
+}
 
 function searchReviews() {
     searchAndAddElements('metauri', (r, tr, ld) => {
