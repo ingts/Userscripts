@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.14
+// @version      1.0.14.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -199,7 +199,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name (as of 2024-08-10)
+    // every theme collection except those with GGn in the name, Visual Novels (1792) and Hentai Role-Playing Games (11865) as of 2024-08-20
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -254,7 +254,6 @@ async function main() {
         [1536, "Games Removed From Steam"],
         [1692, "Native English Visual Novels"],
         [1763, "Games Removed From GOG"],
-        [1792, "Visual Novels"],
         [1793, "Eroge (18+)"],
         [1794, "Nukige (18+)"],
         [1989, "H.P. Lovecraft inspired games"],
@@ -514,8 +513,12 @@ async function main() {
         [11808, "Games Based on The Bible"],
         [11811, "Love Triangle"],
         [11820, "Prehistory"],
+        [11822, "Unreleased/Cancelled Games (Only Available as Prototypes/Early Beta)"],
+        [11827, "Traditional Roguelikes"],
         [11829, "AI Generated Art"],
         [11830, "Asset Flip"],
+        [11840, "Wargames"],
+        [11858, "American Civil War"],
     ])
 
     // every feature collection (as of 2023-12-05)
@@ -584,7 +587,7 @@ async function main() {
         [11554, "Flying games"]
     ])
 
-    // every franchise collection (as of 2023-12-05)
+    // every franchise collection (as of 2024-08-20)
     const franchises = [
         [3, "Need for Speed "],
         [14, "Doom"],
@@ -983,7 +986,9 @@ async function main() {
         [11502, "My Little Pony"],
         [11517, "Puzzle League"],
         [11550, "Ensemble Stars"],
-        [11576, "Modern Art"]
+        [11576, "Modern Art"],
+        [11850, "Zone of the Enders"],
+        [11874, "Sker"],
     ]
 
     // every engine collection (as of 2024-07-23)
@@ -1280,6 +1285,9 @@ async function main() {
         ["turn-based strategy", 3813],
         ["turn-based tactics", 3813],
         ["turn-based", 3813],
+
+        ["traditional roguelike", 11827],
+        ["wargame", 11840],
     ])
 
     // from tags
@@ -1817,6 +1825,7 @@ async function main() {
         ["massively multiplayer", 7176],
     ])
 
+    // from genres
     const mobygamesThemes = new Map([
         ["gambling", 8307],
         ["isometric", 131],
@@ -1846,6 +1855,7 @@ async function main() {
         ["turn-based tactics (tbt)", 3813],
 
         ["prehistoric", 5515],
+        ["wargame", 11840],
     ])
 
     // IDs are in the url
@@ -1921,6 +1931,9 @@ async function main() {
 
         [9013, 11808], // Bible educational games
         [5165, 11808], // Wisdom Tree's Bible-themed games
+
+        [8755, 11851], // Bridge Construction games
+        [6200, 11858], // Historical conflict: American Civil War
     ])
 
     // https://www.mobygames.com/attributes/tech-specs
@@ -1957,7 +1970,7 @@ async function main() {
     PCGamingWiki Cargo query values are all strings. Don't need to lowercase
     https://www.pcgamingwiki.com/wiki/Special:CargoTables
     Themes are found in https://www.pcgamingwiki.com/wiki/Category:Taxonomy
-     */
+    */
 
     const pcgwThemes = new Map([
         // Genre
@@ -1966,6 +1979,7 @@ async function main() {
         ["Metroidvania", 155],
         ["Rail shooter", 6556],
         ["Vehicle combat", 10872],
+        ["Wargame", 11840],
 
         ["Tactical RPG", 3813],
         ["TBS", 3813],
@@ -2697,6 +2711,8 @@ async function main() {
             foundThemes.add(10887) // Vertical Shoot 'em ups
             foundThemes.add(11320) // Horizontal Shoot 'em ups
         }
+        if (document.querySelector("#tagslist a[href*='adult']"))
+            foundThemes.delete(1232) // Japanese Role-Playing Games
 
         const uncheck = new Set([
             10887,
