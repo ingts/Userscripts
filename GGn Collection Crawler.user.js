@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.14.1
+// @version      1.0.14.2
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -991,7 +991,7 @@ async function main() {
         [11874, "Sker"],
     ]
 
-    // every engine collection (as of 2024-07-23)
+    // every engine collection (as of 2024-08-21)
     const enginesMap = new Map([
         ["Creation Engine", 175],
         ["ScummVM", 199],
@@ -1217,7 +1217,8 @@ async function main() {
         ["Solar2D", 11458],
         ["VOCALOID", 11523],
         ["Divinity Engine", 11613],
-        ["mTropolis", 11815]
+        ["mTropolis", 11815],
+        ["Phaser Engine", 11882]
     ])
 
     const steamThemes = new Map([
