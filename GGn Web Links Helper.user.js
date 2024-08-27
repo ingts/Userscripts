@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.3
+// @version      1.3.1
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -96,7 +96,7 @@ const playstation4Sites = [
 ]
 
 const switchSites = [
-    ['Nintendo', 'https://www.nintendo.co.uk/Search/Search-299117.html?q=NAME', 'nintendouri', '^(https?:\\/\\/|)(www.|ec.|store-jp.)nintendo\\.(com|co\\.uk|co\\.jp)\\/(JP\\/ja|Games|games|list)?\\/?(detail|Nintendo-Switch|titles|software).*\\/[a-zA-Z0-9\-]+(\\.html)?\\/?$'],
+    ['Nintendo', 'https://www.nintendo.co.uk/Search/Search-299117.html?q=NAME', 'nintendouri', '^(https?:\\/\\/|)(www.|ec.|store-jp.)nintendo\\.(com|co\\.uk|co\\.jp)\\/.*[a-zA-Z0-9-]+(\\.html)?\\/?$'],
 ]
 
 const PPrpgSites = [
