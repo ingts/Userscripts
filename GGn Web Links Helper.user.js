@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.3.1
+// @version      1.4
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -28,15 +28,18 @@ if (typeof GM_getValue('auto_search_reviews') === 'undefined')
     GM_setValue('auto_search_reviews', true)
 if (typeof GM_getValue('check_first_word') === 'undefined')
     GM_setValue('check_first_word', true)
-if (typeof GM_getValue('refresh_after_submit') === 'undefined') {
+if (typeof GM_getValue('refresh_after_submit') === 'undefined')
     GM_setValue('refresh_after_submit', false)
-}
+if (typeof GM_getValue('default_unchecked') === 'undefined')
+    GM_setValue('default_unchecked', false)
+
 
 
 let auto_search = GM_getValue('auto_search')
 /** @type number */
 const max_results = GM_getValue('max_results')
 const isEditPage = location.href.includes('editgroup')
+const default_unchecked = GM_getValue('default_unchecked')
 
 // review site arrays: name, search url, score input id, score input max, step, urlinputid
 const reviewSites = [
@@ -422,6 +425,7 @@ function setAlternateNames(groupname) {
 }
 
 function addUncheckButton(form, reviews) {
+    if (default_unchecked) return
     const unchecker = document.createElement('button')
     unchecker.type = 'button'
     unchecker.textContent = `Uncheck ${reviews ? 'Reviews' : 'All'}`
@@ -963,7 +967,7 @@ function addElementsToRow(tr, loading, index) {
     anchor.style.wordBreak = 'break-all'
     anchor.style.color = '#BBB4B8'
     label.append(anchor)
-    label.insertAdjacentHTML('beforeend', `<input type="checkbox" style="padding-left: 5px;" ${(index ? '' : 'checked')}>`)
+    label.insertAdjacentHTML('beforeend', `<input type="checkbox" style="padding-left: 5px;" ${(index ? '' : default_unchecked ? '' : 'checked')}>`)
     return anchor
 }
 
