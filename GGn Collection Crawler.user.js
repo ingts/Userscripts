@@ -2178,10 +2178,10 @@ async function main() {
                     GM_deleteValue('check_steamdb')
                     tab.close()
                     const {tech, deckVerified, hasLinux} = newValue
-                    if (deckVerified) { // only add if linux supported and on linux group or not on linux supported
+                    if (deckVerified) { // only add if linux supported and on linux group or not on linux supported and on windows group
                         if (hasLinux) {
                             if (platform === 'Linux') foundThemes.add(10563)
-                        } else foundThemes.add(10563)
+                        } else if (platform === 'Windows') foundThemes.add(10563)
                     }
                     GM_deleteValue(key)
                     resolve(1)
