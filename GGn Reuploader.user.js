@@ -6,15 +6,43 @@
 // @author       dullfool68, ingts
 // @match        https://gazellegames.net/torrents.php?id=*
 // @match        https://gazellegames.net/torrents.php?action=edit&id=*
-// @grant        GM.setValue
-// @grant        GM.getValue
-// @grant        GM.deleteValue
-// @grant        GM.openInTab
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_deleteValue
+// @grant        GM_openInTab
 // @require
 // ==/UserScript==
-
 if (window.location.pathname.includes("upload")) {
-    prefillUploadPage()
+    const formData = JSON.parse(
+        GM_getValue("data", null),
+    )
+    if (formData) {
+        GM_deleteValue("data")
+        const form = document.getElementById('upload_table')
+        form.addEventListener('submit', () => {
+            GM_setValue("new", 1)
+        })
+
+        for (const key of Object.keys(formData)) {
+            const inputElement = form.querySelector(`[name=${key}]`)
+            const value = formData[key]
+            if (value === null) continue
+
+            if (inputElement.type === "checkbox") {
+                inputElement.checked = true
+            } else {
+                inputElement.value = value
+            }
+            if (inputElement.onclick) inputElement.dispatchEvent(new Event('click'))
+            if (inputElement.onchange) inputElement.dispatchEvent(new Event('change'))
+            if (key === 'scan') {
+                const radio = document.getElementById(`${value === 0 ? 'digital' : 'scan'}`)
+                radio.checked = true
+                radio.dispatchEvent(new Event('click'))
+            }
+        }
+        document.getElementById('release_title').dispatchEvent(new Event('blur'))
+    }
 } else if (window.location.pathname.includes("torrent")) {
     $("tr.group_torrent > td > span > a:last-child").after(function () {
         const torrentId = /id=([0-9]+)/.exec($(this).attr("href"))[1]
@@ -24,6 +52,11 @@ if (window.location.pathname.includes("upload")) {
         })
         return [document.createTextNode(" | "), upload]
     })
+    if (GM_getValue("new", null)) {
+        document.querySelector(`#torrent${GM_getValue("torrentId")}`).style.backgroundColor = '#70474e'
+    }
+    GM_deleteValue("new")
+    GM_deleteValue("torrentId")
 }
 
 async function getTorrentFormData(torrentId) {
@@ -42,13 +75,13 @@ async function getTorrentFormData(torrentId) {
 }
 
 async function handleUploadClick(torrentId) {
+    GM_setValue("torrentId", torrentId)
+
     const formData = await getTorrentFormData(torrentId)
     if (!formData) {
         console.error("Form Data was null.")
         return
     }
-
-    const groupid = new URL(location.href).searchParams.get('id')
 
     const FORM_KEYS = [
         "remaster",
@@ -73,8 +106,8 @@ async function handleUploadClick(torrentId) {
         "other_bitrate", // OST
     ]
 
-    await GM.setValue(
-        groupid,
+    GM_setValue(
+        "data",
         JSON.stringify(
             FORM_KEYS.reduce((acc, cur) => {
                 acc[cur] = formData.get(cur)
@@ -82,36 +115,6 @@ async function handleUploadClick(torrentId) {
             }, {}),
         ),
     )
-
-    await GM.openInTab(`https://gazellegames.net/upload.php?groupid=${groupid}`, {active: true})
-}
-
-async function prefillUploadPage() {
-    const groupid = new URL(location.href).searchParams.get('groupid')
-
-    const formData = JSON.parse(
-        (await GM.getValue(groupid, "{}")),
-    )
-
-    await GM.deleteValue(groupid)
-
-    for (const key of Object.keys(formData)) {
-        const inputElement = document.querySelector(`#upload_table [name=${key}]`)
-        const value = formData[key]
-        if (value === null) continue
-
-        if (inputElement.type === "checkbox") {
-            inputElement.checked = true
-        } else {
-            inputElement.value = value
-        }
-        if (inputElement.onclick) inputElement.dispatchEvent(new Event('click'))
-        if (inputElement.onchange) inputElement.dispatchEvent(new Event('change'))
-        if (key === 'scan') {
-            const radio = document.getElementById(`${value === 0 ? 'digital' : 'scan'}`)
-            radio.checked = true
-            radio.dispatchEvent(new Event('click'))
-        }
-    }
+    GM_openInTab(`https://gazellegames.net/upload.php?groupid=${new URL(location.href).searchParams.get('id')}`, {active: true})
 }
 
