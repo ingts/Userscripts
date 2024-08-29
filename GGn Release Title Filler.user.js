@@ -72,7 +72,8 @@ function addButton(exact) {
 const titleInput = document.getElementById('release_title')
 
 function setTitle(exact, alias) {
-    const noExt = /(.*?)\.?(?:zip|7z|rar|iso|sh|dmg|appimage|arc|tar.(?:gz|xz|zst|bz2))?.torrent/i.exec(filename)?.[1] ?? ''
+    const exts = ["flac", "mp3", "pdf", "epub", "mobi", "cbz", "cbr", "cb7", "azw3","zip", "7z", "rar", "iso", "sh", "dmg", "appimage", "arc", "nsp", "xci"]
+    const noExt = new RegExp(`(.*?)\\.?(?:${exts.join('|')}|tar.(?:gz|xz|zst|bz2))?.torrent`, 'i').exec(filename)?.[1] ?? ''
     if (exact) {
         titleInput.value = noExt
     } else {
