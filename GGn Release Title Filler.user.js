@@ -50,8 +50,8 @@ if (aliasInput.value) {
 let filename
 
 fileInput.onchange = () => {
-    filename = fileInput.value
-    if (autofill) {
+    filename = fileInput.files[0].name
+    if (autofill && document.getElementById('categories').value === 'Games') {
         if (!/\s/.test(filename) && filename.includes('-')) setTitle(true) // likely scene
         else setTitle(false)
     }
@@ -72,7 +72,7 @@ function addButton(exact) {
 const titleInput = document.getElementById('release_title')
 
 function setTitle(exact, alias) {
-    const noPathAndExt = /\\.*\\(.*?)\.?(?:zip|7z|rar|iso|sh|dmg|appimage|arc|tar.(?:gz|xz|zst|bz2))?.torrent/i.exec(filename)?.[1] ?? ''
+    const noPathAndExt = /(.*?)\.?(?:zip|7z|rar|iso|sh|dmg|appimage|arc|tar.(?:gz|xz|zst|bz2))?.torrent/i.exec(filename)?.[1] ?? ''
     if (exact) {
         titleInput.value = noPathAndExt
     } else {
