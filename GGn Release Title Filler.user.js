@@ -72,13 +72,13 @@ function addButton(exact) {
 const titleInput = document.getElementById('release_title')
 
 function setTitle(exact, alias) {
-    const noPathAndExt = /(.*?)\.?(?:zip|7z|rar|iso|sh|dmg|appimage|arc|tar.(?:gz|xz|zst|bz2))?.torrent/i.exec(filename)?.[1] ?? ''
+    const noExt = /(.*?)\.?(?:zip|7z|rar|iso|sh|dmg|appimage|arc|tar.(?:gz|xz|zst|bz2))?.torrent/i.exec(filename)?.[1] ?? ''
     if (exact) {
-        titleInput.value = noPathAndExt
+        titleInput.value = noExt
     } else {
         const groupTitle = document.getElementById('title').value
-        const version = /((?:[(\[].*)?v.*)/.exec(noPathAndExt)?.[1] // optional bracket before version
-            ?? /([(\[].*[\])])/.exec(noPathAndExt)?.[1] // bracket only for e.g. (Build 123456)
+        const version = /((?:[(\[].*)?v.*)/.exec(noExt)?.[1] // optional bracket before version
+            ?? /([(\[].*[\])])/.exec(noExt)?.[1] // bracket only for e.g. (Build 123456)
             ?? ''
 
         titleInput.value = alias ? `${alias} ${version}` : `${groupTitle} ${version}`
