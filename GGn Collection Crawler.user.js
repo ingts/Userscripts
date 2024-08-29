@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.14.2
+// @version      1.0.15
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -103,6 +103,7 @@ if (location.hostname === "steamdb.info" && GM_getValue('check_steamdb', false))
         const deckInfo = document.querySelector('ul.app-json')
         if (deckInfo?.firstElementChild.textContent.includes('Verified'))
             info.deckVerified = true
+        info.hasLinux = !!document.querySelector('.octicon-linux')
 
         GM_setValue('steamdb_info', info)
     }
@@ -1308,10 +1309,14 @@ async function main() {
     const steamFeatures = new Map([
         ["vr only", 683], // will be changed to theme
         ["vr supported", 559],
-        ["lan co-op", 961],
+        ["online co-op", 961],
         ["lan co-op", 962],
         ["lan co-op", 963],
+        ["lan pvp", 963],
         ["lan co-op", 77],
+        ["shared/split screen pvp", 476],
+        ["shared/split screen co-op", 476],
+        ["shared/split screen", 476],
         ["tracked controller support", 1884],
         ["in-app purchases", 1526],
         ["includes level editor", 5913],
@@ -2025,7 +2030,6 @@ async function main() {
         ["Prehistoric", 11820],
     ])
 
-    // Local means same device but doesn't specify if it's split screen
     const pcgwFeatures = new Map([ // only match if their value is "true"
         ["Controller support", 551],
         ["Full controller support", 551],
@@ -2041,11 +2045,13 @@ async function main() {
     ])
 
     const pcgwFeatures_Substring = [ // match key and value. Values are checked if they are included in the string
+        // Local on pcgw means same screen but on Local Multiplayer/Co-op on GGn includes same screen and LAN. Single Screen Multiplayer is added later
         ["Local players", "2", 472],
         ["Local players", "4", 473],
         ["Local modes", "Hot seat", 475],
         ["Local modes", "Co-op", 962],
-        ["Online modes", "Co-op", 962],
+        ["LAN modes", "Co-op", 963],
+        ["Online modes", "Co-op", 961],
         ["Upscaling", "DLSS", 10604],
         ["Upscaling", "FSR", 11486],
     ]
@@ -2171,8 +2177,12 @@ async function main() {
                     GM_removeValueChangeListener(listener)
                     GM_deleteValue('check_steamdb')
                     tab.close()
-                    const {tech, deckVerified} = newValue
-                    deckVerified && foundThemes.add(10563)
+                    const {tech, deckVerified, hasLinux} = newValue
+                    if (deckVerified) { // only add if linux supported and on linux group or not on linux supported
+                        if (hasLinux) {
+                            if (platform === 'Linux') foundThemes.add(10563)
+                        } else foundThemes.add(10563)
+                    }
                     GM_deleteValue(key)
                     resolve(1)
                     if (!tech) return
@@ -2443,6 +2453,7 @@ async function main() {
     Multiplayer.Local,
     Multiplayer.Local_players,
     Multiplayer.Local_modes,
+    Multiplayer.LAN_modes,
     Multiplayer.Online_modes,
     VR_support.OculusVR,
     VR_support.Windows_Mixed_Reality,
@@ -2728,15 +2739,18 @@ async function main() {
     }
 
     if (foundFeatures.size > 0) {
-        if (foundFeatures.has(472)) { // 2-Player Split Screen Multiplayer
+        if (foundFeatures.has(472)) // 2-Player Split Screen Multiplayer
             foundFeatures.add(473) // 4-Player Split Screen Multiplayer
-        }
-        if (foundFeatures.has(476)) { // Single Screen Multiplayer
+        if (foundFeatures.has(472))
+            foundFeatures.add(476) // Single Screen Multiplayer
+        if (foundFeatures.has(476)) {
             foundFeatures.add(472)
             foundFeatures.add(473)
         }
-        if (foundFeatures.has(962)) // Local Co-op support
-            foundFeatures.add(963) // Co-Op Support
+        if (foundFeatures.has(962)) { // Local Co-op support
+            foundFeatures.add(961) // Co-Op Support
+            foundFeatures.add(963) // Local Multiplayer
+        }
         if (foundFeatures.has(961) && foundFeatures.has(963)) // Co-Op Support & Local Multiplayer
             foundFeatures.add(962)
         const uncheck = new Set([
