@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Reuploader
 // @namespace    none
-// @version      1
+// @version      2
 // @description  Upload torrents to the same group using an existing torrent's details
 // @author       dullfool68, ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -23,10 +23,15 @@ if (window.location.pathname.includes("upload")) {
             GM_setValue("new", 1)
         })
 
-        for (const key of Object.keys(formData)) {
+        for (const [key, value] of formData) {
+            if (key === 'scan') {
+                const radio = document.getElementById(`${value === '0' ? 'digital' : 'scan'}`)
+                radio.checked = true
+                radio.dispatchEvent(new Event('click'))
+                continue
+            }
+            if (!value) continue
             const inputElement = form.querySelector(`[name=${key}]`)
-            const value = formData[key]
-            if (value === null) continue
 
             if (inputElement.type === "checkbox") {
                 inputElement.checked = true
@@ -35,11 +40,6 @@ if (window.location.pathname.includes("upload")) {
             }
             if (inputElement.onclick) inputElement.dispatchEvent(new Event('click'))
             if (inputElement.onchange) inputElement.dispatchEvent(new Event('change'))
-            if (key === 'scan') {
-                const radio = document.getElementById(`${value === 0 ? 'digital' : 'scan'}`)
-                radio.checked = true
-                radio.dispatchEvent(new Event('click'))
-            }
         }
         document.getElementById('release_title').dispatchEvent(new Event('blur'))
     }
@@ -71,7 +71,15 @@ async function getTorrentFormData(torrentId) {
         return null
     }
 
-    return new FormData(formElement)
+    const formData = new FormData(formElement)
+    if (doc.getElementById('digital')?.checked) {
+        formData.set('scan', '0')
+        formData.delete('scan_dpi')
+    }
+    else if (doc.getElementById('scan')?.checked) {
+        formData.set('scan', '1')
+    }
+    return formData
 }
 
 async function handleUploadClick(torrentId) {
