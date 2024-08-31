@@ -23,7 +23,7 @@ if (window.location.pathname.includes("upload")) {
             GM_setValue("new", 1)
         })
 
-        for (const [key, value] of formData) {
+        for (const [key, value] of Object.entries(formData)) {
             if (key === 'scan') {
                 const radio = document.getElementById(`${value === '0' ? 'digital' : 'scan'}`)
                 radio.checked = true
