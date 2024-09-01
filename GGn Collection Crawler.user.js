@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.15
+// @version      1.0.15.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -588,7 +588,7 @@ async function main() {
         [11554, "Flying games"]
     ])
 
-    // every franchise collection (as of 2024-08-20)
+    // every franchise collection (as of 2024-09-01)
     const franchises = [
         [3, "Need for Speed "],
         [14, "Doom"],
@@ -672,6 +672,7 @@ async function main() {
         [922, "Sailor Moon"],
         [924, "Warcraft"],
         [966, "Game & Watch"],
+        [970, "Frogger"],
         [984, "Transformers"],
         [986, "Hatsune Miku"],
         [1013, "Beatmania"],
@@ -990,6 +991,7 @@ async function main() {
         [11576, "Modern Art"],
         [11850, "Zone of the Enders"],
         [11874, "Sker"],
+        [11903, "Age of Empires"],
     ]
 
     // every engine collection (as of 2024-08-21)
