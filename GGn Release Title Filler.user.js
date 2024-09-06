@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Release Title Filler
-// @version      1
+// @version      2
 // @description  Set release title from torrent file
 // @author       ingts
 // @grant        GM_setValue
@@ -83,6 +83,7 @@ function setTitle(exact, alias) {
             ?? ''
 
         titleInput.value = alias ? `${alias} ${version}` : `${groupTitle} ${version}`
+        titleInput.dispatchEvent(new Event('blur'))
     }
 }
 
