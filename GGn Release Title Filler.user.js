@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Release Title Filler
-// @version      3
+// @version      4
 // @description  Set release title from torrent file
 // @author       ingts
 // @grant        GM_setValue
@@ -72,7 +72,8 @@ function addButton(exact) {
 const titleInput = document.getElementById('release_title')
 
 function setTitle(exact, alias) {
-    const exts = ["flac", "mp3", "pdf", "epub", "mobi", "cbz", "cbr", "cb7", "azw3","zip", "7z", "rar", "iso", "sh", "dmg", "appimage", "arc", "nsp", "xci", "exe"]
+    const exts = ["flac", "mp3", "pdf", "epub", "mobi", "cbz", "cbr", "cb7", "azw3","zip",
+        "7z", "rar", "iso", "sh", "dmg", "appimage", "arc", "nsp", "xci", "exe", "apk", "ipa"]
     const noExt = new RegExp(`(.*?)\\.?(?:${exts.join('|')}|tar.(?:gz|xz|zst|bz2))?.torrent`, 'i').exec(filename)?.[1] ?? ''
     if (exact) {
         titleInput.value = noExt
