@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Release Title Filler
-// @version      4
+// @version      5
 // @description  Set release title from torrent file
 // @author       ingts
 // @grant        GM_setValue
@@ -79,12 +79,15 @@ function setTitle(exact, alias) {
         titleInput.value = noExt
     } else {
         const groupTitle = document.getElementById('title').value
-        const version = /(?:[(\[].*)?v\d.*/.exec(noExt)?.[0] // optional bracket before version
-            ?? /(\d\..*)/.exec(noExt)?.[0] // number without v (usually DRM free)
+        let version = /(?:[(\[].*)?v?\d.*/.exec(noExt)?.[0] // optional bracket and v before version
             ?? /[(\[].*[\])]/.exec(noExt)?.[0] // bracket only for e.g. (Build 123456)
             ?? ''
 
-        titleInput.value = alias ? `${alias} ${version}` : `${groupTitle} ${version}`
+        if (/^\d/.test(version)) {
+            version = `v${version}`
+        }
+
+        titleInput.value = `${alias ? alias : groupTitle} ${version}`
         titleInput.dispatchEvent(new Event('blur'))
     }
 }
