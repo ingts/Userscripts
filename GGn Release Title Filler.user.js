@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Release Title Filler
-// @version      2
+// @version      3
 // @description  Set release title from torrent file
 // @author       ingts
 // @grant        GM_setValue
@@ -72,14 +72,15 @@ function addButton(exact) {
 const titleInput = document.getElementById('release_title')
 
 function setTitle(exact, alias) {
-    const exts = ["flac", "mp3", "pdf", "epub", "mobi", "cbz", "cbr", "cb7", "azw3","zip", "7z", "rar", "iso", "sh", "dmg", "appimage", "arc", "nsp", "xci"]
+    const exts = ["flac", "mp3", "pdf", "epub", "mobi", "cbz", "cbr", "cb7", "azw3","zip", "7z", "rar", "iso", "sh", "dmg", "appimage", "arc", "nsp", "xci", "exe"]
     const noExt = new RegExp(`(.*?)\\.?(?:${exts.join('|')}|tar.(?:gz|xz|zst|bz2))?.torrent`, 'i').exec(filename)?.[1] ?? ''
     if (exact) {
         titleInput.value = noExt
     } else {
         const groupTitle = document.getElementById('title').value
-        const version = /((?:[(\[].*)?v.*)/.exec(noExt)?.[1] // optional bracket before version
-            ?? /([(\[].*[\])])/.exec(noExt)?.[1] // bracket only for e.g. (Build 123456)
+        const version = /(?:[(\[].*)?v\d.*/.exec(noExt)?.[0] // optional bracket before version
+            ?? /(\d\..*)/.exec(noExt)?.[0] // number without v (usually DRM free)
+            ?? /[(\[].*[\])]/.exec(noExt)?.[0] // bracket only for e.g. (Build 123456)
             ?? ''
 
         titleInput.value = alias ? `${alias} ${version}` : `${groupTitle} ${version}`
