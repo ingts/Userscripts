@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Steam Uploady (edited)
 // @namespace    https://gazellegames.net/
-// @version      11
+// @version      12
 // @description  Fill upload form with Steam info. Edited from "GGn New Uploady"
 // @author       NeutronNoir, ZeDoCaixao, ingts
 // @match        https://gazellegames.net/upload.php*
@@ -102,7 +102,7 @@ const allowedTags = new Set([
 
 const tagMap = new Map([
     ["Sci-fi", "science.fiction"],
-    ["Sexual Content", "adult"],
+    ["NSFW", "adult"],
     ["Hentai", "adult"],
     ["Roguelike", "roguelike"],
     ["Roguelite", "roguelike"],
@@ -137,7 +137,7 @@ function html2bb(str) {
     str = str.replace(/< *\/ *h[12] *>/g, "[/b][/u][/align]\n")
     str = str.replace(/\&quot;/g, "\"")
     str = str.replace(/\&amp;/g, "&")
-    str = str.replace(/< *img *src="([^"]*)".*>/g, "\n")
+    str = str.replace(/< *img.*/g, "\n")
     str = str.replace(/< *a [^>]*>/g, "")
     str = str.replace(/< *\/ *a *>/g, "")
     str = str.replace(/< *p *>/g, "\n\n")
@@ -291,6 +291,65 @@ function fill_form(response) {
         }
     }
 
+    const ratings = gameInfo.ratings
+    const ratingInput = document.getElementById('Rating')
+
+    const ratingMap = new Map([ // dejus and steam_germany can be self rated
+        ['pegi', new Map([
+            ['3', 1],
+            ['7', 3],
+            ['12', 5],
+            ['16', 7],
+            ['18', 9],
+        ])],
+        ['esrb', new Map([
+            ['e', 1],
+            ['e10', 3],
+            ['t', 5],
+            ['m', 7],
+            ['ao', 9],
+        ])],
+        ['nzoflc', new Map([
+            ['g', 1],
+            ['r13', 5],
+            ['r16', 7],
+            ['r18', 9],
+        ])],
+        ['cero', new Map([
+            ['a', 1],
+            ['b', 5],
+            ['c', 5],
+            ['d', 7],
+            ['z', 9],
+        ])],
+        ['csrr', new Map([ // gsrr?
+            ['g', 1],
+            ['p', 3],
+            ['pg12', 5],
+            ['pg15', 7],
+            ['r', 9],
+        ])],
+        ['usk', new Map([
+            ['0', 1],
+            ['6', 3],
+            ['12', 5],
+            ['16', 7],
+            ['18', 9],
+        ])]
+    ])
+
+    for (const [k, v] of ratingMap) {
+        if (Object.hasOwn(ratings, k)) {
+            ratingInput.value = v.get(ratings[k].rating)
+            ratingInput.closest('tr').firstElementChild
+                .insertAdjacentHTML('beforeend', `<span style="color: #d6c9b6;display: block;">Source: ${k}</span>`)
+            break
+        }
+    }
+
+    if (!ratingInput.value)
+        ratingInput.value = 13
+
     let platform = "Windows"
     let cover_field = "input[name='image']"
     let desc_field = "textarea[name='body']"
@@ -419,6 +478,8 @@ steamIdInput.onblur = () => {
                     }
                 }
                 document.getElementById('tags').value = Array.from(uploadTags).join(', ')
+                if (uploadTags.has('adult'))
+                    document.getElementById('Rating').value = 9
             }
         })
     }
