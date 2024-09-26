@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Steam Uploady (edited)
 // @namespace    https://gazellegames.net/
-// @version      12
+// @version      13
 // @description  Fill upload form with Steam info. Edited from "GGn New Uploady"
 // @author       NeutronNoir, ZeDoCaixao, ingts
 // @match        https://gazellegames.net/upload.php*
@@ -130,15 +130,16 @@ function html2bb(str) {
     str = str.replace(/< *\/ *em *>/g, "[/i]")
     str = str.replace(/< *li *>/g, "[*]")
     str = str.replace(/< *\/ *li *>/g, "")
-    str = str.replace(/< *ul *class=\\*\"bb_ul\\*\" *>/g, "")
+    str = str.replace(/< *ul *class=\\*"bb_ul\\*" *>/g, "")
     str = str.replace(/< *\/ *ul *>/g, "")
-    str = str.replace(/< *h2 *class=\"bb_tag\" *>/g, "\n[align=center][u][b]")
+    str = str.replace(/< *h2 *class="bb_tag" *>/g, "\n[align=center][u][b]")
     str = str.replace(/< *h[12] *>/g, "\n[align=center][u][b]")
     str = str.replace(/< *\/ *h[12] *>/g, "[/b][/u][/align]\n")
-    str = str.replace(/\&quot;/g, "\"")
-    str = str.replace(/\&amp;/g, "&")
-    str = str.replace(/< *img.*/g, "\n")
+    str = str.replace(/&quot;/g, "\"")
+    str = str.replace(/&amp;/g, "&")
     str = str.replace(/< *a [^>]*>/g, "")
+    str = str.replace(/<p class="bb_paragraph"><\/p>/g, '\n\n')
+    str = str.replace(/<p class="bb_paragraph">/g, '')
     str = str.replace(/< *\/ *a *>/g, "")
     str = str.replace(/< *p *>/g, "\n\n")
     str = str.replace(/< *\/ *p *>/g, "")
@@ -150,6 +151,7 @@ function html2bb(str) {
     str = str.replace(/\n\n\n+/gm, "\n\n")
     str = str.replace(/\[\/b]\[\/u]\[\/align]\n\n/g, "[/b][/u][/align]\n")
     str = str.replace(/\n\n\[\*]/g, "\n[*]")
+    str = str.replace(/< *img.*/g, "\n")
     return str
 }
 
@@ -173,10 +175,10 @@ function pretty_sr(str) {
     if (!str) return ""
     str = str.replace(/™/g, "")
     str = str.replace(/®/g, "")
-    str = str.replace(/:\[\/b\] /g, "[/b]: ")
+    str = str.replace(/:\[\/b] /g, "[/b]: ")
     str = str.replace(/:\n/g, "\n")
-    str = str.replace(/:\[\/b\]\n/g, "[/b]\n")
-    str = str.replace(/\n\n\[b\]/g, "\n[b]")
+    str = str.replace(/:\[\/b]\n/g, "[/b]\n")
+    str = str.replace(/\n\n\[b]/g, "\n[b]")
     return str
 }
 
