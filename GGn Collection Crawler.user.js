@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.15.1
+// @version      1.0.16
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2146,7 +2146,7 @@ async function main() {
             addCollectionIds(genreIds, DLsiteFeatures, foundFeatures, true)
             foundDevelopers.add(maker)
         }, `https://www.dlsite.com/home/api/=/product.json?
-        workno=${DLsiteCode}&fields=genres,maker_name,maker_name_en`, {
+        workno=${DLsiteCode}&fields=genres,maker_name,maker_name_en,options`, {
             responseType: "json"
         })
     }
@@ -2180,7 +2180,7 @@ async function main() {
                     GM_deleteValue('check_steamdb')
                     tab.close()
                     const {tech, deckVerified, hasLinux} = newValue
-                    if (deckVerified) { // only add if linux supported and on linux group or not on linux supported and on windows group
+                    if (deckVerified) { // only add if linux supported and on linux group or linux isn't supported and on windows group
                         if (hasLinux) {
                             if (platform === 'Linux') foundThemes.add(10563)
                         } else if (platform === 'Windows') foundThemes.add(10563)
@@ -2639,6 +2639,10 @@ async function main() {
     await Promise.allSettled(promises)
     await Promise.allSettled(promises) // for nested requests
 
+    const existingCollectionIds = Array.from(
+        document.querySelectorAll("#collages a[href*='collections.php?id='], #sidebar_group_info a[href*='collections.php?id=']"))
+        .map(a => /\d+/.exec(a.href)[0])
+
     function insertHeader(headerText) {
         content.insertAdjacentHTML('beforeend', `
         <h3>${headerText}</h3>`)
@@ -2646,22 +2650,23 @@ async function main() {
 
     function insertLabel(id, name) {
         if (content.querySelector(`a[href='collections.php?id=${id}']`)) return
+        const isExisting = existingCollectionIds.includes(id)
         content.insertAdjacentHTML('beforeend', `
 <label>
-<a href="collections.php?id=${id}" target="_blank">${name}</a>
-<input type="checkbox" checked>
+<a href="collections.php?id=${id}" ${isExisting ? `style="color: #999C9F"` : ''} target="_blank">${name}</a>
+${isExisting ? '' : `<input type="checkbox" checked>`}
 </label>`)
-
     }
 
     function insertLabelsId(headerText, set, collectionMap, uncheckSet) {
         insertHeader(headerText)
 
         set.forEach(id => {
+            const isExisting = existingCollectionIds.includes(id.toString())
             content.insertAdjacentHTML('beforeend', `
 <label>
-<a href="collections.php?id=${id}" target="_blank">${collectionMap.get(id)}</a>
-<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked'}>
+<a href="collections.php?id=${id}" ${isExisting ? `style="color: #999C9F"` : ''} target="_blank">${collectionMap.get(id)}</a>
+${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked'}>`}
 </label>
 `)
         })
