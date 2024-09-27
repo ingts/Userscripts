@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4
+// @version      1.4.1
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -411,7 +411,8 @@ async function runGroup() {
         }
         searchSites(groupname, encodedGroupname)
         addUncheckButton(form)
-        addUncheckButton(form, reviewsBody)
+        if (platform)
+            addUncheckButton(form, reviewsBody)
     } else {
         addSearchAllButtonHandler(form, reviewsBody)
     }
