@@ -11,9 +11,13 @@
 // @connect      steamcdn-a.akamaihd.net
 // ==/UserScript==
 
-const get_languages = true
-const format_about = true
-const get_image_res = false
+if (typeof GM_getValue('get_languages') === 'undefined')
+    GM_setValue('get_languages', true)
+if (typeof GM_getValue('format_about') === 'undefined')
+    GM_setValue('format_about', true)
+if (typeof GM_getValue('get_image_res') === 'undefined')
+    GM_setValue('get_image_res', false)
+
 
 const allowedTags = new Set([
     // "Casual", allowed but too common
@@ -183,7 +187,7 @@ function pretty_sr(str) {
 }
 
 function formatAbout(about) {
-    if (!format_about) return about
+    if (!GM_getValue('format_about')) return about
     const toTitleCase = unsafeWindow?.TitleAndScreenshotsFormatter?.toTitleCase ?? function (str) {
         return str
     }
@@ -279,7 +283,7 @@ function fill_form(response) {
         if (i === 20) break
         if (i >= 4) add_screen.click()
         screens[i].value = gameInfo.screenshots[i].path_full.split("?")[0]
-        if (get_image_res) {
+        if (GM_getValue('get_image_res')) {
             new Promise((resolve, reject) => {
                 let img = new Image()
                 img.src = gameInfo.screenshots[i].path_full.split("?")[0]
@@ -366,7 +370,7 @@ function fill_form(response) {
         }
     } else {
         const parseSteamLanguage = unsafeWindow?.GetLanguagesFromSteam?.parseSteamLanguage // from Get Languages From Steam script
-        if (parseSteamLanguage && get_languages && !document.getElementById('empty_group').checked) {
+        if (parseSteamLanguage && GM_getValue('get_languages') && !document.getElementById('empty_group').checked) {
             parseSteamLanguage(gameInfo.supported_languages)
         }
 
