@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Steam Uploady (edited)
 // @namespace    https://gazellegames.net/
-// @version      13
+// @version      14
 // @description  Fill upload form with Steam info. Edited from "GGn New Uploady"
 // @author       NeutronNoir, ZeDoCaixao, ingts
 // @match        https://gazellegames.net/upload.php*
@@ -313,13 +313,13 @@ function fill_form(response) {
         ])],
         ['nzoflc', new Map([
             ['g', 1],
-            ['r13', 5],
+            ['r13', 7],
             ['r16', 7],
             ['r18', 9],
         ])],
         ['cero', new Map([
             ['a', 1],
-            ['b', 5],
+            ['b', 3],
             ['c', 5],
             ['d', 7],
             ['z', 9],
