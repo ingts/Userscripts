@@ -7,6 +7,8 @@
 // @match        https://gazellegames.net/upload.php*
 // @match        https://gazellegames.net/torrents.php?action=editgroup*
 // @grant        GM_xmlhttpRequest
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @connect      store.steampowered.com
 // @connect      steamcdn-a.akamaihd.net
 // ==/UserScript==
