@@ -9,6 +9,7 @@
 // @grant        GM_registerMenuCommand
 // @connect      store.epicgames.com
 // @connect      store-content.ak.epicgames.com
+// @connect      litterbox.catbox.moe
 // ==/UserScript==
 
 function fillOptions(options = {
@@ -106,7 +107,6 @@ GM_registerMenuCommand('Run', () => {
     mainDiv.style.cssText = `
         position: absolute;
     width: 250px;
-    height: 490px;
     left: 20%;
     top: 0.1%;
     background-color: #2a2b36;
@@ -115,6 +115,7 @@ GM_registerMenuCommand('Run', () => {
     flex-direction: column;
     align-items: center;
     gap: 2px;
+    padding: 3px 0
     `
     const loading = document.createElement('p')
     loading.textContent = 'Loading'
@@ -144,6 +145,7 @@ GM_registerMenuCommand('Run', () => {
         }
         mainDiv.remove()
     }).then(catalog => {
+        console.log("catalog", catalog)
         const coverImage = catalog.keyImages.find(image => image.type === "OfferImageTall")?.url
         if (!coverImage) {
             alert('No cover image found')
@@ -207,27 +209,48 @@ GM_registerMenuCommand('Run', () => {
                 })
             }
 
-            if (coverImage.includes('.jpg') || coverImage.includes('.png')) {
-                mainDiv.insertAdjacentHTML('beforeend', `<button id="egs-cover-ptpimg" type="button">PTPImg and Submit</button>`)
-                document.getElementById('egs-cover-ptpimg').onclick = () => {
-                    function f(url, text) {
-                        ptpimg(url)
-                            .then(ptpimgLink => {
-                                body.append('image', ptpimgLink)
-                                submitCover(body).then(() => {
-                                    text.remove()
-                                    done()
-                                })
-                            })
-                    }
 
+            mainDiv.insertAdjacentHTML('beforeend', `<button id="egs-cover-ptpimg" type="button">PTPImg and Submit</button>`)
+            document.getElementById('egs-cover-ptpimg').onclick = () => {
+                function finish(url, text) {
+                    ptpimg(url)
+                        .then(ptpimgLink => {
+                            body.append('image', ptpimgLink)
+                            submitCover(body).then(() => {
+                                text.remove()
+                                done()
+                            })
+                        })
+                }
+
+                if (coverImage.includes('.jpg') || coverImage.includes('.png')) {
                     const text = addText("Uploading to PTPimg")
-                    f(coverImage, text)
+                    finish(coverImage, text)
+                } else {
+                    const text = addText('URL has no extension. Uploading to litterbox first')
+                    promiseXHR(coverImage, {responseType: 'blob'})
+                        .then(r => {
+                            const blob = r.response
+                            console.log(blob)
+                            const fd = new FormData()
+                            fd.append('time', '1h')
+                            fd.append('reqtype', 'fileupload')
+                            fd.append('fileToUpload', new File([blob], 'a.' + blob.type.split('/')[1]))
+
+                            promiseXHR('https://litterbox.catbox.moe/resources/internals/api.php', {
+                                method: 'POST',
+                                data: fd,
+                            }).then(r => {
+                                text.textContent = "Uploading to PTPimg"
+                                finish(r.response, text)
+                            })
+                        })
                 }
             }
         })
     })
 })
+
 
 function ptpimg(url) {
     return fetch(`imgup.php?img=${url}`)
@@ -257,4 +280,25 @@ function submitCover(body) {
         .catch(() => {
             alert(`Failed to submit`)
         })
+}
+
+function promiseXHR(url, options) {
+    return new Promise((resolve, reject) => {
+        GM_xmlhttpRequest({
+            url,
+            ...options,
+            onabort: (response) => {
+                reject(response)
+            },
+            onerror: (response) => {
+                reject(response)
+            },
+            ontimeout: (response) => {
+                reject(response)
+            },
+            onload: (response) => {
+                resolve(response)
+            },
+        })
+    })
 }
