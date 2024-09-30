@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.16
+// @version      1.0.17
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2717,7 +2717,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
 
     if (earlyAccess)
         foundThemes.add(152) // Early Access
-    else if (document.querySelector("#collages a[href*='collections.php?id=152']")) // group has Early Access but is not found to be in Early Access
+    else if (existingCollectionIds.includes('152')) // group has Early Access but is not found to be in Early Access
         foundThemes.add(5148) // Out of Early Access
 
 
@@ -2924,7 +2924,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         submitButton.disabled = true
 
         const selectedIds = Array.from(content.querySelectorAll('label a'))
-            .filter(a => a.nextElementSibling.checked)
+            .filter(a => a.nextElementSibling?.checked)
             .map(a => new URL(a.href).searchParams.get('id'))
 
         if (selectedIds.length < 1) {
