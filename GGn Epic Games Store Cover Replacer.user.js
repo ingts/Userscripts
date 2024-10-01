@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Epic Games Store Cover Replacer
 // @namespace    none
-// @version      1
+// @version      2
 // @description  Easily replace cover using Epic Games Store images
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -72,6 +72,21 @@ function graphql(query, variables, extensions) {
     return doFetch(url).then(response => response.data)
 }
 
+function getMappingByPageSlug(slug) {
+    const variables = {
+        pageSlug: slug,
+        locale: "en-US",
+    }
+    const extensions = {
+        persistedQuery: {
+            version: 1,
+            sha256Hash: "781fd69ec8116125fa8dc245c0838198cdf5283e31647d08dfa27f45ee8b1f30",
+        }
+    }
+
+    return graphql("getMappingByPageSlug", variables, extensions)
+}
+
 function getProductMapping(slug) {
     return doFetch(`https://store-content.ak.epicgames.com/api/en-US/content/products/${slug}`)
 }
@@ -126,12 +141,18 @@ GM_registerMenuCommand('Run', () => {
     coverDiv.after(mainDiv)
 
 
-    getProductMapping(slug).then(mapping => {
+    getProductMapping(slug).then(mapping => { // some games don't have this. {"error":true,"message":"Page was not found"}
         return {
             sandboxId: mapping.namespace,
             offerId: mapping.pages.find(o => o.type === "productHome").offer.id // could find from data.editions.editions but doesn't work for games that have only 1 edition
         }
-    }).then(async identifiers => {
+    }).catch(() => { //
+        return getMappingByPageSlug(slug).then(mapping => ({
+            sandboxId: mapping.StorePageMapping.mapping.sandboxId,
+            offerId: mapping.StorePageMapping.mapping.mappings.offerId
+        }))
+    })
+        .then(async identifiers => {
         let tries = 4
         while (tries > 0) {
             const catalog = await getCatalogOffer(identifiers)
@@ -231,7 +252,6 @@ GM_registerMenuCommand('Run', () => {
                     promiseXHR(coverImage, {responseType: 'blob'})
                         .then(r => {
                             const blob = r.response
-                            console.log(blob)
                             const fd = new FormData()
                             fd.append('time', '1h')
                             fd.append('reqtype', 'fileupload')
