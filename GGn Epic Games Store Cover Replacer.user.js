@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Epic Games Store Cover Replacer
 // @namespace    none
-// @version      2
+// @version      3
 // @description  Easily replace cover using Epic Games Store images
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -15,9 +15,6 @@
 function fillOptions(options = {
     method: "GET",
     responseType: "json",
-    headers: {
-        referer: 'https://store.epicgames.com/en-US/',
-    },
     onSuccess: (response) => {
         return JSON.parse(response.responseText)
     }
@@ -101,7 +98,7 @@ function getCatalogOffer(identifiers) {
     const extensions = {
         persistedQuery: {
             version: 1,
-            sha256Hash: "c4ad546ad2757b60ff13ace19ffaf134abb23cb663244de34771a0444abfdf33",
+            sha256Hash: "abafd6e0aa80535c43676f533f0283c7f5214a59e9fae6ebfb37bed1b1bb2e9b", // if this changes again, need to get it from page source
         }
     }
 
