@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.1
+// @version      1.4.2
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -684,7 +684,16 @@ function searchSites(groupname, encodedGroupname) {
     searchAndAddElements('gamefaqsuri', ['.sr_name > a', '.sr_info'])
     searchAndAddElements('mobygamesuri', ['td b a', 'td b + span'])
 
-    searchAndAddElements('steamuri', ['#search_result_container a', '.col.search_released.responsive_secondrow'])
+    searchAndAddElements('steamuri', (r, tr, ld) => {
+        const doc = parseDoc(r)
+        const arrayLike = doc.querySelectorAll('#search_result_container a')
+        const anchors = Array.from(arrayLike)
+        anchors.forEach(anchor => anchor.href = /.*\/app\/\d+\//.exec(anchor.href)?.[0] ?? anchor.href) // don't want stuff after the number
+        const years = doc.querySelectorAll('.col.search_released.responsive_secondrow')
+        for (let i = 0; i < Math.min(max_results, anchors.length); i++) {
+            setAnchorProperties(addElementsToRow(tr, ld, i), `${findTextNode(anchors[i])}, ${years[i].textContent}`, anchors[i].href)
+        }
+    })
     searchAndAddElements('goguri', ['.paginated-products-grid a', 'product-title'])
     searchAndAddElements('humbleuri', '.entity-title')
     searchAndAddElements('itchuri', '.game_title a')
