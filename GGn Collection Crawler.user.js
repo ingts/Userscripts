@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
 // @namespace    none
-// @version      1.0.17
+// @version      1.0.18
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -200,7 +200,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name, Visual Novels (1792) and Hentai Role-Playing Games (11865) as of 2024-08-20
+    // every theme collection except those with GGn in the name, Visual Novels (1792), Hentai Role-Playing Games (11865) as of 2024-10-13. later ones are added only if they can be found
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -405,7 +405,7 @@ async function main() {
         [8817, "Pixel Graphics"],
         [8838, "Voxel Art"],
         [8852, "Powered by the Apocalypse"],
-        [8913, "Clay animation"],
+        [8913, "Clay Animation"],
         [8933, "Games with Designer's Name in Title"],
         [9150, "Games Based on Comics"],
         [9188, "Alpha/beta builds"],
@@ -469,7 +469,7 @@ async function main() {
         [10964, "Tug of War Strategy"],
         [10965, "Lane Defense"],
         [10966, "Boss Rush"],
-        [10970, "Incremental games with story/complicated clicker"],
+        [10970, "(Incremental games with story / Complicated Clicker"],
         [10973, "Hand-drawn graphics"],
         [10980, "Xbox PC Game Pass"],
         [10981, "Point and Click: Adventure games"],
@@ -505,11 +505,11 @@ async function main() {
         [11571, "SsethTzeentach's Featured Games"],
         [11642, "Tentacles (18+)"],
         [11751, "Hypnosis (18+)"],
-        [11754, "Chikan"],
+        [11754, "Chikan (18+)"],
         [11769, "Harem"],
         [11770, "Time Stop"],
         [11800, "Set in a Death Game/Battle Royale"],
-        [11801, "Combat Sex"],
+        [11801, "Combat Sex (18+)"],
         [11805, "Incest"],
         [11808, "Games Based on The Bible"],
         [11811, "Love Triangle"],
@@ -518,9 +518,12 @@ async function main() {
         [11827, "Traditional Roguelikes"],
         [11829, "AI Generated Art"],
         [11830, "Asset Flip"],
-        [11840, "Wargames"],
-        [11858, "American Civil War"],
+        [11840, "Wargame"],
     ])
+
+    const adultThemes = new Set(
+        [1793, 1794, 3039, 3041, 3185, 4908, 5129, 5366, 5844, 5845, 5846, 6233, 7831, 11341, 11642, 11751, 11754, 11769, 117770, 11801, 11805,]
+    )
 
     // every feature collection (as of 2023-12-05)
     const featuresMap = new Map([
@@ -2639,6 +2642,7 @@ async function main() {
     await Promise.allSettled(promises)
     await Promise.allSettled(promises) // for nested requests
 
+    const groupIsAdult = document.querySelector("#tagslist a[href*='adult']")
     const existingCollectionIds = Array.from(
         document.querySelectorAll("#collages a[href*='collections.php?id='], #sidebar_group_info a[href*='collections.php?id=']"))
         .map(a => /\d+/.exec(a.href)[0])
@@ -2702,6 +2706,11 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
 
     foundDevelopers = new Set(Array.from(foundDevelopers, name => name.toLowerCase().replace(suffixPattern, '').trim()))
     foundPublishers = new Set(Array.from(foundPublishers, name => name.toLowerCase().replace(suffixPattern, '').trim()))
+    if (!groupIsAdult) {
+        foundThemes.forEach(id => {
+            if (adultThemes.has(id)) foundThemes.delete(id)
+        })
+    }
 
     let notFound = new Set()
 
@@ -2730,7 +2739,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
             foundThemes.add(10887) // Vertical Shoot 'em ups
             foundThemes.add(11320) // Horizontal Shoot 'em ups
         }
-        if (document.querySelector("#tagslist a[href*='adult']"))
+        if (groupIsAdult)
             foundThemes.delete(1232) // Japanese Role-Playing Games
 
         const uncheck = new Set([
