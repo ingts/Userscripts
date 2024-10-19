@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Steam Uploady (edited)
 // @namespace    https://gazellegames.net/
-// @version      15
+// @version      16
 // @description  Fill upload form with Steam info. Edited from "GGn New Uploady"
 // @author       NeutronNoir, ZeDoCaixao, ingts
 // @match        https://gazellegames.net/upload.php*
@@ -130,6 +130,7 @@ function html2bb(str) {
     str = str.replace(/< *\/ *u *>/g, "[/u]")
     str = str.replace(/< *i *>/g, "[i]")
     str = str.replace(/< *\/ *i *>/g, "[/i]")
+    str = str.replace(/<strong><\/strong>/g, " ")
     str = str.replace(/< *strong *>/g, "[b]")
     str = str.replace(/< *\/ *strong *>/g, "[/b]")
     str = str.replace(/< *em *>/g, "[i]")
