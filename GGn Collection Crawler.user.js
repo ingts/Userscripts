@@ -2927,7 +2927,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         for (const [id, name] of publishers) {
             insertLabel(id, name)
         }
-        for (const name of foundPublishers) {
+        for (const name of foundPublishersArray) {
             await findCollections(name, r => {
                 r.forEach(({category, id, name}) => {
                     if (category === 'Publisher')
