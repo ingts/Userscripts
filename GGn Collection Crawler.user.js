@@ -1,7 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @namespace    none
-// @version      1.0.18
+// @version      1.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -25,7 +24,6 @@
 // @connect      itch.io
 // @connect      wikipedia.org
 // ==/UserScript==
-
 
 if (typeof GM_getValue('corner_button') === 'undefined')
     GM_setValue('corner_button', true)
@@ -136,6 +134,17 @@ async function main() {
                 padding: 0;
                 grid-column: span ${GM_getValue('columns')};
             }
+            
+            #cc h3 span {
+                font-size: 0.8rem;
+                color: #c9aadf;
+                font-weight: normal;
+            }
+            
+            #cc h3 span.comma {
+                font-size: 0.8rem;
+                color: unset;
+            }
 
             #cc div.head span {
                 margin-left: 10px;
@@ -174,16 +183,19 @@ async function main() {
     const DLsiteCode = DLsiteAliasMatch && DLsiteAliasMatch[0]
         || (officialSiteLink?.includes('dlsite') && DLsiteCodePattern.exec(officialSiteLink)[0])
 
+    const wikipedia = document.querySelector("a[title=Wikipedia]")
     const websites = new Map([
         ["DLsite", DLsiteCode],
         ["Steam", document.querySelector("a[title=Steam]")],
         ["itch.io", document.querySelector("a[title=Itch]")],
         ["MobyGames", document.querySelector("a[title=MobyGames]")],
         ["PCGamingWiki", document.querySelector("a[title=PCGamingWiki]")],
-        ["Wikipedia", document.querySelector("a[title=Wikipedia]")],
+        ["Wikipedia", wikipedia],
         ["VNDB", document.querySelector("a[title=VNDB]")],
     ])
 
+    if (!wikipedia?.href.includes('en.wikipedia'))
+        websites.delete("Wikipedia")
     let noLink = true
 
     websites.forEach((value, key) => {
@@ -200,7 +212,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name, Visual Novels (1792), Hentai Role-Playing Games (11865) as of 2024-10-13. later ones are added only if they can be found
+    // every theme collection except those with GGn in the name, Visual Novels (1792), Hentai Role-Playing Games (11865) as of 2024-10-26. later ones are added only if they can be found
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -503,11 +515,13 @@ async function main() {
         [11545, "Metal Gear Solid: Master Collection Vol.1"],
         [11546, "Club Nintendo rewards"],
         [11571, "SsethTzeentach's Featured Games"],
+        [11615, "Nintendo Gamecube Exclusives"],
         [11642, "Tentacles (18+)"],
         [11751, "Hypnosis (18+)"],
         [11754, "Chikan (18+)"],
         [11769, "Harem"],
         [11770, "Time Stop"],
+        [11781, "Wii U Exclusives"],
         [11800, "Set in a Death Game/Battle Royale"],
         [11801, "Combat Sex (18+)"],
         [11805, "Incest"],
@@ -519,6 +533,12 @@ async function main() {
         [11829, "AI Generated Art"],
         [11830, "Asset Flip"],
         [11840, "Wargame"],
+        [12086, "Games Based on Folklore/Fables"],
+        [12089, "Greek Mythology"],
+        [12096, "Vikings"],
+        [12098, "Quick Time Events"],
+        [12124, "Tricks"],
+        [12127, "Twin stick Shoot'em ups"],
     ])
 
     const adultThemes = new Set(
@@ -1295,6 +1315,8 @@ async function main() {
 
         ["traditional roguelike", 11827],
         ["wargame", 11840],
+        ["vikings", 12096],
+        ["twin stick shooter", 12127],
     ])
 
     // from tags
@@ -1730,6 +1752,9 @@ async function main() {
 
         [3684, 11829], // AI-generated Assets
         [3663, 11829], // AI-generated Graphics
+
+        [1008, 12086], // Fairy Tale
+        [58, 12089], // Greek Mythology
     ])
 
     const vndbThemesExtra = new Map([
@@ -1819,6 +1844,9 @@ async function main() {
         ["turn-based", 3813],
         ["turn-based combat", 3813],
         ["turn-based strategy", 3813],
+
+        ["folklore", 12086],
+        ["twin stick shooter", 12127],
     ])
 
     // from tags
@@ -1867,6 +1895,7 @@ async function main() {
 
         ["prehistoric", 5515],
         ["wargame", 11840],
+        ["tricks / stunts", 12124],
     ])
 
     // IDs are in the url
@@ -1886,8 +1915,18 @@ async function main() {
         [10553, 2380], // Gameplay feature: Permadeath / permanent death
         [3043, 2515], // Dungeons & Dragons Campaign Setting: Forgotten Realms
         [5857, 2832], // Visual technique / style: Cel shaded
+        [15257, 10145], // Console Generation Exclusives: Dreamcast
+        [15477, 11386], // Console Generation Exclusives: Sega Saturn
         [15633, 3232], // Console Generation Exclusives: Xbox
         [15232, 3267], // Console Generation Exclusives: PlayStation 2
+        [14766, 7194], // Console Generation Exclusives: PlayStation 3
+        [14802, 7090], // Console Generation Exclusives: PlayStation 4
+        [15476, 7590], // Console Generation Exclusives: Nintendo 64
+        [16401, 7628], // Console Generation Exclusives: Xbox 360
+        [18937, 9626], // Console Generation Exclusives: Nintendo Switch
+        [18857, 11781], // Console Generation Exclusives: Wii U
+        [18857, 7590], // Console Generation Exclusives: Nintendo 64
+        [18857, 11615], // Console Generation Exclusives: GameCube
         [6053, 3994], // Theme: Vampires
         [10848, 4924], // Theme: Halloween
         [11484, 5078], // Distribution Method: Episodic
@@ -1902,11 +1941,7 @@ async function main() {
         [9585, 6751], // Genre: Simulation - Space combat
         [9584, 6751], // Genre: Simulation - Space trading and combat
 
-        [14766, 7194], // Console Generation Exclusives: PlayStation 3
-        [14802, 7090], // Console Generation Exclusives: PlayStation 4
         [9770, 7210], // Genre: Simulation - Train driving
-        [15476, 7590], // Console Generation Exclusives: Nintendo 64
-        [16401, 7628], // Console Generation Exclusives: Xbox 360
         [7286, 7826], // Animals: Cats
         [4293, 7828], // Inspiration: Author - Edgar Allan Poe
         [9039, 8035], // Setting: Interwar
@@ -1915,7 +1950,6 @@ async function main() {
         [7483, 8838], // Visual technique / style: Voxel graphics
         [8241, 8913], // Visual technique / style: Rendered in clay
         [16676, 9498], // Setting: Chernobyl Exclusion Zone
-        [18937, 9626], // Console Generation Exclusives: Nintendo Switch
         [2730, 9666], // Theme: Hacking / Pseudohacking
         [12467, 9814], // Setting: Aquatic / Underwater
         [1537, 9819], // Powerpuff Girls licensees
@@ -1925,7 +1959,6 @@ async function main() {
         [8410, 9838], // Hellboy licensees
         [3212, 9839], // Genre: Truck racing / driving
         [10033, 9840], // Theme: RMS Titanic
-        [15257, 10145], // Console Generation Exclusives: Dreamcast
         [418, 10342], // Clive Barker licensees
         [8497, 10445], // Genre: Word / Number Puzzle - Nonograms / Picross
         [7614, 10464], // Setting: Mars
@@ -1937,7 +1970,6 @@ async function main() {
         [4916, 11277], // Gameplay feature: Photography
         [17206, 11296], // Mythology: Slavic
         [17440, 11355], // Kinetic visual novels
-        [15477, 11386], // Console Generation Exclusives: Sega Saturn
         [10860, 11519], // My Little Pony fangames
 
         [9013, 11808], // Bible educational games
@@ -1945,6 +1977,13 @@ async function main() {
 
         [8755, 11851], // Bridge Construction games
         [6200, 11858], // Historical conflict: American Civil War
+        [3557, 9150], // Inspiration: Comics
+        [1541, 6826], // Inspiration: Movies
+        [9407, 3729], // Manga / anime licensees
+        [6335, 12086], // Inspiration: Literature
+        [7437, 12089], // Mythology: Greek
+        [9161, 12098], // Gameplay feature: Quick Time Events / QTEs
+        [9599, 12127], // Genre: Dual / Twin-stick shooter
     ])
 
     // https://www.mobygames.com/attributes/tech-specs
@@ -1991,6 +2030,8 @@ async function main() {
         ["Rail shooter", 6556],
         ["Vehicle combat", 10872],
         ["Wargame", 11840],
+        ["Quick time events", 12098],
+        ["tricks", 12124],
 
         ["Tactical RPG", 3813],
         ["TBS", 3813],
@@ -2125,7 +2166,7 @@ async function main() {
                 func(res, sitename)
             })
             .catch(e => {
-                console.trace(`${sitename} error ${e}`)
+                console.error(`${sitename} error ${e}`)
                 setErrorStatus(sitename)
             })
         )
@@ -2647,9 +2688,20 @@ async function main() {
         document.querySelectorAll("#collages a[href*='collections.php?id='], #sidebar_group_info a[href*='collections.php?id=']"))
         .map(a => /\d+/.exec(a.href)[0])
 
-    function insertHeader(headerText) {
-        content.insertAdjacentHTML('beforeend', `
-        <h3>${headerText}</h3>`)
+    /**
+     * @param {string} headerText
+     * @param {Set<string>?} extra
+     */
+    function insertHeader(headerText, extra) {
+        const header = document.createElement('h3')
+        header.textContent = headerText + ' '
+        if (extra) {
+            Array.from(extra).forEach((name, index) => {
+                header.insertAdjacentHTML('beforeend', `<span>${name}</span>${index !== extra.size - 1 ?
+                    "<span class='comma'>, </span>": ''}`)
+            })
+        }
+        content.append(header)
     }
 
     function insertLabel(id, name) {
@@ -2697,15 +2749,15 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
     foundPublishers.delete(null)
     foundPublishers.delete(undefined)
 
-    const suffixes = ["Inc", "LLC", "Ltd", "Co", "Corp", "Pvt", "PLC", "AG", "GmbH", "SA", "AB", "NV", "KG",
+    const suffixes = ["Inc", "Co., Ltd", "LLC", "Ltd", "Co", "Corp", "Pvt", "PLC", "AG", "GmbH", "SA", "AB", "NV", "KG",
         "OG", "EOOD", "SRL", "BV", "SL", "AS", "A/S", "Pty", "Ltda", "Sdn", "Bhd", "PT", "Pte", "Ltd", "LLP",
         "LP", "SARL", "e.V", "SE", "Oy", "RF", "Lda", "SpA", "Kft", "Zrt", "AS", "d.o.o", "s.r.o", "o.o.",
         "OOO", "A.D.", "JSC", "P.J.S.C", "S.A.B.", "C.V.", "S.A.P.I.", "de C.V.", "S. de R.L.", "de C.V.",
-        "S.A.P.I.", "B.V.", "N.V.", "S.A.", "S.C.A.", "S.C.R.L.", "S.C.S.", "S.N.C.", "intl", "international"]
-    const suffixPattern = new RegExp(`,?\\s?\\b(${suffixes.join("|")})\\b\.?`, "i")
+        "S.A.P.I.", "B.V.", "N.V.", "S.A.", "S.C.A.", "S.C.R.L.", "S.C.S.", "S.N.C.", "intl", "international",]
+    const suffixPattern = new RegExp(`,?\\s?(${suffixes.join("|")})\.?`, "i")
 
-    foundDevelopers = new Set(Array.from(foundDevelopers, name => name.toLowerCase().replace(suffixPattern, '').trim()))
-    foundPublishers = new Set(Array.from(foundPublishers, name => name.toLowerCase().replace(suffixPattern, '').trim()))
+    foundDevelopers = new Set(Array.from(foundDevelopers, name => name.replace(suffixPattern, '').toLowerCase().trim()))
+    foundPublishers = new Set(Array.from(foundPublishers, name => name.replace(suffixPattern, '').toLowerCase().trim()))
     if (!groupIsAdult) {
         foundThemes.forEach(id => {
             if (adultThemes.has(id)) foundThemes.delete(id)
@@ -2741,6 +2793,11 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         }
         if (groupIsAdult)
             foundThemes.delete(1232) // Japanese Role-Playing Games
+        const consoleExclusiveIds = [10145, 11386, 3232, 3267, 7194, 7090, 7590, 7628, 9626, 11781, 7590, 11615]
+        const linkedGroups = Array.from(document.querySelectorAll('#grouplinks a div'))
+        if (!linkedGroups.every(div => div.className === 'cats_ebooks' || div.className === 'cats_ost')) {
+            consoleExclusiveIds.forEach(id => foundThemes.delete(id))
+        }
 
         const uncheck = new Set([
             10887,
@@ -2769,6 +2826,10 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         }
         if (foundFeatures.has(961) && foundFeatures.has(963)) // Co-Op Support & Local Multiplayer
             foundFeatures.add(962)
+        if (!['Windows', 'Linux', 'Mac'].includes(platform)) {
+            foundFeatures.delete(551) // Native Controller Support
+            foundFeatures.delete(3345) // Touch-Friendly Desktop Games
+        }
         const uncheck = new Set([
             472,
             473,
@@ -2807,15 +2868,15 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         }
         insertNotFound()
     }
-    let publishers = []
 
     async function findCollections(searchValue, func) {
+        console.log('searching for', searchValue)
         await fetch(`ajax.php?action=collections_autocomplete&search=${encodeURIComponent(searchValue)}`,
         )
             .then(r => r.json())
             .then(r => {
-                console.log('searching for', searchValue)
-                const [, names, , urlsWithId] = r
+                let [, names, , path] = r
+                names = names.filter(n => n.toLowerCase().startsWith(searchValue))
                 if (names.length < 1) {
                     notFound.add(searchValue)
                     return
@@ -2824,7 +2885,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
                     const [, name, category] = /(.*)\((.*?)\)$/.exec(n)
                     return {
                         category: category,
-                        id: /\d+/.exec(urlsWithId[i])[0],
+                        id: /\d+/.exec(path[i])[0],
                         name: name.trim()
                     }
                 }))
@@ -2835,17 +2896,21 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
             })
     }
 
+    const foundPublishersArray = [...foundPublishers]
+    let publishers = []
 
-    insertHeader('Developers')
+    insertHeader('Developers', foundDevelopers)
     for (const devname of foundDevelopers) {
         let found
-        if (foundPublishers.has(devname))
-            foundPublishers.delete(devname)
 
         await findCollections(devname, r => {
             r.forEach(({category, id, name}) => {
                 if (category === 'Publisher') {
-                    publishers.push([id, name])
+                    const index = foundPublishersArray.findIndex(p => p.startsWith(name.toLowerCase()))
+                    if (index !== -1) {
+                        foundPublishersArray.splice(index, 1)
+                        publishers.push([id, name])
+                    }
                 } else if (category === 'Developer') {
                     found = true
                     insertLabel(id, name)
@@ -2858,7 +2923,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
     insertNotFound()
 
     if (foundPublishers.size > 0 || publishers.length > 0) {
-        insertHeader('Publishers')
+        insertHeader('Publishers', foundPublishers)
         for (const [id, name] of publishers) {
             insertLabel(id, name)
         }
@@ -2874,22 +2939,24 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
     }
 
     if (foundSeries) {
-        insertHeader('Series')
         await findCollections(foundSeries, r => {
             const {category, id, name} = r[0]
-            if (category === 'Series')
+            if (category === 'Series') {
+                insertHeader('Series')
                 insertLabel(id, name)
+            }
         })
         insertNotFound()
     }
 
     if (foundDesigners.size > 0) {
-        insertHeader('Designer')
         for (const name of foundDesigners) {
             await findCollections(name, r => {
                 r.forEach(({category, id, name}) => {
-                    if (category === 'Designer')
+                    if (category === 'Designer') {
+                        insertHeader('Designer')
                         insertLabel(id, name)
+                    }
                 })
             })
         }
