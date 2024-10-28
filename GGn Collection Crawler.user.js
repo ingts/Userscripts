@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1
+// @version      1.1.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2808,7 +2808,8 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
             11477,
             10320, // Machine Translation
         ])
-        insertLabelsId('Themes', foundThemes, themesMap, uncheck)
+        if (foundThemes.size > 0)
+            insertLabelsId('Themes', foundThemes, themesMap, uncheck)
     }
 
     if (foundFeatures.size > 0) {
@@ -2835,7 +2836,8 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
             473,
         ])
 
-        insertLabelsId('Features', foundFeatures, featuresMap, uncheck)
+        if (foundFeatures.size > 0)
+            insertLabelsId('Features', foundFeatures, featuresMap, uncheck)
     }
 
     for (const [id, name] of franchises) {
