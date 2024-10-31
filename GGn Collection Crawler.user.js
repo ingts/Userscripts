@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.1
+// @version      1.1.1.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -212,7 +212,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name, Visual Novels (1792), Hentai Role-Playing Games (11865) as of 2024-10-26. later ones are added only if they can be found
+    // every theme collection except those with GGn in the name, Visual Novels (1792), Hentai Role-Playing Games (11865) as of 2024-10-31. later ones are added only if they can be found
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -539,6 +539,7 @@ async function main() {
         [12098, "Quick Time Events"],
         [12124, "Tricks"],
         [12127, "Twin stick Shoot'em ups"],
+        [12146, "Werewolves"],
     ])
 
     const adultThemes = new Set(
@@ -1317,6 +1318,7 @@ async function main() {
         ["wargame", 11840],
         ["vikings", 12096],
         ["twin stick shooter", 12127],
+        ["werewolves", 12146],
     ])
 
     // from tags
@@ -1755,6 +1757,11 @@ async function main() {
 
         [1008, 12086], // Fairy Tale
         [58, 12089], // Greek Mythology
+
+        [204, 12146], // Werewolf
+        [1136, 12146], // Werewolf Hero
+        [1140, 12146], // Werewolf Protagonist
+        [1305, 12146], // Werewolf Heroine
     ])
 
     const vndbThemesExtra = new Map([
@@ -1781,6 +1788,7 @@ async function main() {
         [2114, 6701], // Clothes: Kuro-Gyaru
 
         [3411, 11770], // Engages in: Time Stop
+        [706, 12146], // Werewolf
     ])
 
     const itchioThemes = new Map([
@@ -1984,6 +1992,7 @@ async function main() {
         [7437, 12089], // Mythology: Greek
         [9161, 12098], // Gameplay feature: Quick Time Events / QTEs
         [9599, 12127], // Genre: Dual / Twin-stick shooter
+        [7907, 12146], // Theme: Werewolves
     ])
 
     // https://www.mobygames.com/attributes/tech-specs
