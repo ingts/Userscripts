@@ -190,7 +190,7 @@ async function main() {
         ["itch.io", document.querySelector("a[title=Itch]")],
         ["MobyGames", document.querySelector("a[title=MobyGames]")],
         ["PCGamingWiki", document.querySelector("a[title=PCGamingWiki]")],
-        // ["Wikipedia", wikipedia],
+        ["Wikipedia", wikipedia],
         ["VNDB", document.querySelector("a[title=VNDB]")],
     ])
 
@@ -2393,7 +2393,6 @@ async function main() {
             function addDevsPubs(list, addTo) {
                 list.forEach(a => {
                     const platforms = JSON.parse(a.dataset?.popover)?.platforms
-                    console.log(platforms)
                     if (!platforms) {
                         addTo.add(a.textContent)
                         return
