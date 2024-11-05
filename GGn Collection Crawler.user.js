@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.1.1
+// @version      1.1.2
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -190,7 +190,7 @@ async function main() {
         ["itch.io", document.querySelector("a[title=Itch]")],
         ["MobyGames", document.querySelector("a[title=MobyGames]")],
         ["PCGamingWiki", document.querySelector("a[title=PCGamingWiki]")],
-        ["Wikipedia", wikipedia],
+        // ["Wikipedia", wikipedia],
         ["VNDB", document.querySelector("a[title=VNDB]")],
     ])
 
@@ -2294,23 +2294,6 @@ async function main() {
             const doc = parseDoc(r)
             const tags = getLowercaseTextFromElements(doc, '.info-genres dd a', sitename)
             if (!tags) return
-            addCollectionIds(tags, mobygamesThemes, foundThemes)
-            addAllStrings(getLowercaseTextFromElements(doc, '#publisherLinks a'), foundPublishers, sitename)
-            addAllStrings(getLowercaseTextFromElements(doc, '#developerLinks a'), foundDevelopers, sitename)
-            let groups = Array.from(doc.querySelectorAll('.badge.text-ellipsis a'))
-            for (const a of groups) {
-                if (['engine:', 'middleware:'].some(str => a.textContent.toLowerCase().includes(str))) {
-                    foundEngines.add(a.textContent.replace(/^.*?: /, '')) // remove text before first colon and space
-                    continue
-                }
-                if (a.textContent.includes('series')) {
-                    foundSeries = a.textContent.replace('series', '').trim()
-                }
-            }
-            addCollectionIds(groups.map(a => /\d+/.exec(a.href)[0]), mobygamesThemes_Groups, foundThemes, true)
-
-            const specsLink = doc.querySelector('span.text-nowrap')?.firstElementChild
-            if (!specsLink) return
             const platformMap = new Map([
                 ["Mac", "Macintosh"],
                 ["Apple II", "Apple II"],
@@ -2406,6 +2389,36 @@ async function main() {
                 ["RCA Studio II", "RCA Studio II"],
                 ["SNK Neo Geo Pocket", "Neo Geo Pocket"],
             ])
+            addCollectionIds(tags, mobygamesThemes, foundThemes)
+            function addDevsPubs(list, addTo) {
+                list.forEach(a => {
+                    const platforms = JSON.parse(a.dataset?.popover)?.platforms
+                    console.log(platforms)
+                    if (!platforms) {
+                        addTo.add(a.textContent)
+                        return
+                    }
+                    if (platforms.some(p => platformMap.get(platform) === p))
+                        addTo.add(a.textContent)
+                })
+            }
+            addDevsPubs(doc.querySelectorAll('#developerLinks a'), foundDevelopers)
+            addDevsPubs(doc.querySelectorAll('#publisherLinks a'), foundPublishers)
+            let groups = Array.from(doc.querySelectorAll('.badge.text-ellipsis a'))
+            for (const a of groups) {
+                if (['engine:', 'middleware:'].some(str => a.textContent.toLowerCase().includes(str))) {
+                    foundEngines.add(a.textContent.replace(/^.*?: /, '')) // remove text before first colon and space
+                    continue
+                }
+                if (a.textContent.includes('series')) {
+                    foundSeries = a.textContent.replace('series', '').trim()
+                }
+            }
+            addCollectionIds(groups.map(a => /\d+/.exec(a.href)[0]), mobygamesThemes_Groups, foundThemes, true)
+
+            const specsLink = doc.querySelector('span.text-nowrap')?.firstElementChild
+            if (!specsLink) return
+
             processURL("MobyGames", r => {
                 const doc = parseDoc(r)
                 const platformHeaderRow = getNodeByXPath(doc, `(.//table)[1]//h4[contains(text(), "${platformMap.get(platform)}")]/ancestor::tr`)
@@ -2524,17 +2537,14 @@ async function main() {
     }
 
     if (websites.get("Wikipedia")) {
-        function wikipediaAdd(td, addTo) {
-            const list = td.querySelector('div.plainlist')
-            let text
-            if (list) {
-                list.querySelectorAll('li').forEach(li => {
-                    text = li.textContent.replace(/[\[(].*?[\])]/g, '')
+        function wikipediaAdd(node, addTo) {
+            for (const child of node.childNodes) {
+                if ((child.nodeType === Node.ELEMENT_NODE && child.tagName === 'A' && child.className === 'mw-redirect wl')
+                    || (child.nodeType === Node.TEXT_NODE && /^[a-zA-Z]/.test(child.textContent) && !/[A-Z]{2,3}$/.test(child.textContent))) { // last condition is for regions
+                    const text = child.textContent.replace(/[\[(].*?[\])]/g, '') // skip platforms inside brackets because there's no proper mapping and https://en.wikipedia.org/wiki/Template:Infobox_video_game says that they shouldn't be in there
                     addTo instanceof Set ? addTo.add(text) : addTo = text
-                })
-            } else {
-                text = td.textContent.replace(/[\[(].*?[\])]/g, '')
-                addTo instanceof Set ? addTo.add(text) : addTo = text
+                }
+                wikipediaAdd(child, addTo)
             }
         }
 
@@ -2548,7 +2558,7 @@ async function main() {
             infobox.querySelectorAll('tr:nth-child(2) ~ tr') // skip title and cover image
                 .forEach(tr => {
                     const children = tr.children
-                    switch (children[0].textContent) {
+                    switch (children[0].textContent) { // 0 = th, 1 = td
                         case 'Developer(s)':
                             wikipediaAdd(children[1], foundDevelopers)
                             break
@@ -2758,12 +2768,12 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
     foundPublishers.delete(null)
     foundPublishers.delete(undefined)
 
-    const suffixes = ["Inc", "Co., Ltd", "LLC", "Ltd", "Co", "Corp", "Pvt", "PLC", "AG", "GmbH", "SA", "AB", "NV", "KG",
+    const suffixes = ["Inc", "LLC", "Ltd", "Co", "Corp", "Pvt", "PLC", "AG", "GmbH", "SA", "AB", "NV", "KG",
         "OG", "EOOD", "SRL", "BV", "SL", "AS", "A/S", "Pty", "Ltda", "Sdn", "Bhd", "PT", "Pte", "Ltd", "LLP",
         "LP", "SARL", "e.V", "SE", "Oy", "RF", "Lda", "SpA", "Kft", "Zrt", "AS", "d.o.o", "s.r.o", "o.o.",
         "OOO", "A.D.", "JSC", "P.J.S.C", "S.A.B.", "C.V.", "S.A.P.I.", "de C.V.", "S. de R.L.", "de C.V.",
-        "S.A.P.I.", "B.V.", "N.V.", "S.A.", "S.C.A.", "S.C.R.L.", "S.C.S.", "S.N.C.", "intl", "international",]
-    const suffixPattern = new RegExp(`,?\\s?(${suffixes.join("|")})\.?`, "i")
+        "S.A.P.I.", "B.V.", "N.V.", "S.A.", "S.C.A.", "S.C.R.L.", "S.C.S.", "S.N.C.", "intl", "international", "S.R.l"]
+    const suffixPattern = new RegExp(`,?\\s?(?:Co., Ltd|\\b(${suffixes.join("|")})\\b)\.?`, "i")
 
     foundDevelopers = new Set(Array.from(foundDevelopers, name => name.replace(suffixPattern, '').toLowerCase().trim()))
     foundPublishers = new Set(Array.from(foundPublishers, name => name.replace(suffixPattern, '').toLowerCase().trim()))
@@ -2943,6 +2953,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
                 r.forEach(({category, id, name}) => {
                     if (category === 'Publisher')
                         insertLabel(id, name)
+                    else notFound.add(name)
                 })
             })
         }
@@ -2950,24 +2961,24 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
     }
 
     if (foundSeries) {
+        insertHeader('Series')
         await findCollections(foundSeries, r => {
             const {category, id, name} = r[0]
             if (category === 'Series') {
-                insertHeader('Series')
                 insertLabel(id, name)
-            }
+            } else notFound.add(name)
         })
         insertNotFound()
     }
 
     if (foundDesigners.size > 0) {
+        insertHeader('Designer')
         for (const name of foundDesigners) {
             await findCollections(name, r => {
                 r.forEach(({category, id, name}) => {
                     if (category === 'Designer') {
-                        insertHeader('Designer')
                         insertLabel(id, name)
-                    }
+                    } else notFound.add(name)
                 })
             })
         }
