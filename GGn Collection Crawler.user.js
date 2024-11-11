@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.2
+// @version      1.1.3
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2284,7 +2284,9 @@ async function main() {
 
             const madeWithTd = getNodeByXPath(doc, ".//table//td[text()='Made with']")
             if (madeWithTd) {
-                addAllStrings(getLowercaseTextFromElements(madeWithTd.nextElementSibling, 'a', sitename), foundEngines)
+                const madeWith = getLowercaseTextFromElements(madeWithTd.nextElementSibling, 'a', sitename)
+                    .filter(t => t !== 'blender')  // not Blender Game Engine
+                addAllStrings(madeWith, foundEngines)
             }
         })
     }
