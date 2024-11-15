@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.3
+// @version      1.1.3.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -212,7 +212,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name, Visual Novels (1792), Hentai Role-Playing Games (11865) as of 2024-10-31. later ones are added only if they can be found
+    // every theme collection except those with GGn in the name, Visual Novels (1792), Hentai Role-Playing Games (11865) as of 2024-11-151. later ones are added only if they can be found
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -240,7 +240,7 @@ async function main() {
         [585, "Post-Apocalyptic"],
         [586, "Zombie Games"],
         [623, "Dancing Games"],
-        [624, "Political Games"],
+        [624, "Political and Government Simulation Games"],
         [673, "World War II"],
         [683, "Virtual Reality (VR) Only"],
         [853, "Games for Non-Gamers"],
@@ -540,6 +540,8 @@ async function main() {
         [12124, "Tricks"],
         [12127, "Twin stick Shoot'em ups"],
         [12146, "Werewolves"],
+        [12235, "Political-themed Games"],
+        [12236, "Aliens"],
     ])
 
     const adultThemes = new Set(
@@ -1300,7 +1302,7 @@ async function main() {
 
         ["political", 624],
         ["politics", 624],
-        ["political sim", 624],
+        ["political sim", 12235],
         ["diplomacy", 624],
 
         ["underwater", 9814],
@@ -1913,7 +1915,7 @@ async function main() {
         [14070, 130], // Theme: LGBT
         [9700, 164], // Crowd Funding (Successful)
         [8038, 586], // Theme: Zombies
-        [9654, 624], // Genre: Simulation - Political
+        [9654, 12235], // Genre: Simulation - Political
         [712, 856], // Protagonist: Female
 
         [11581, 902], // Games with music-based procedural generation
