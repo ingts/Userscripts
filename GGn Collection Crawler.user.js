@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.3.1
+// @version      1.1.3.2
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -1321,6 +1321,7 @@ async function main() {
         ["vikings", 12096],
         ["twin stick shooter", 12127],
         ["werewolves", 12146],
+        ["aliens", 12236],
     ])
 
     // from tags
@@ -1764,6 +1765,11 @@ async function main() {
         [1136, 12146], // Werewolf Hero
         [1140, 12146], // Werewolf Protagonist
         [1305, 12146], // Werewolf Heroine
+
+        [345, 12236], // Extraterrestrial
+        [509, 12236], // Alien Heroine
+        [1162, 12236], // Alien Protagonist
+        [1270, 12236], // Alien Hero
     ])
 
     const vndbThemesExtra = new Map([
@@ -1857,6 +1863,7 @@ async function main() {
 
         ["folklore", 12086],
         ["twin stick shooter", 12127],
+        ["aliens", 12236],
     ])
 
     // from tags
@@ -1995,6 +2002,7 @@ async function main() {
         [9161, 12098], // Gameplay feature: Quick Time Events / QTEs
         [9599, 12127], // Genre: Dual / Twin-stick shooter
         [7907, 12146], // Theme: Werewolves
+        [9660, 12236], // Protagonist: Extraterrestrial / Alien
     ])
 
     // https://www.mobygames.com/attributes/tech-specs
