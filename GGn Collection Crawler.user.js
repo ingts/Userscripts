@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.3.2
+// @version      1.1.4
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2667,7 +2667,7 @@ async function main() {
 
             processURL("VNDB", r => {
                     let adult
-                    for (const {engine, languages, official, producers, has_ero, uncensored} of r.response.results) {
+                    for (const {engine, languages, official, producers, has_ero, uncensored, released} of r.response.results) {
                         foundEngines.add(engine)
                         if (uncensored) foundThemes.add(4138) // Uncensored Games
                         if (has_ero) adult = true
@@ -2676,13 +2676,15 @@ async function main() {
                                 foundPublishers.add(name)
                         }
 
-                        const lang = languages[0].lang
-                        if (languages[0].mtl) foundThemes.add(10320) // Machine Translation
-                        if (lang === originalLang) continue
-                        if (official) {
-                            if (lang === "en") foundThemes.add(62) // English Translated Visual Novels
-                        } else {
-                            foundThemes.add(unofficialTranslationMap.get(lang))
+                        if (released !== 'TBA') {
+                            const lang = languages[0].lang
+                            if (languages[0].mtl) foundThemes.add(10320) // Machine Translation
+                            if (lang === originalLang) continue
+                            if (official) {
+                                if (lang === "en") foundThemes.add(62) // English Translated Visual Novels
+                            } else {
+                                foundThemes.add(unofficialTranslationMap.get(lang))
+                            }
                         }
                     }
                     if (adult) {
@@ -2691,7 +2693,7 @@ async function main() {
                     }
                 }, 'https://api.vndb.org/kana/release', setOptions({
                     "filters": ["and", ["vn", "=", ["id", "=", `${vnId}`]], ["platform", "=", `${platformMap.get(platform)}`]],
-                    "fields": "engine, languages.lang, languages.mtl, official, producers.publisher, producers.name, has_ero, uncensored",
+                    "fields": "engine, languages.lang, languages.mtl, official, producers.publisher, producers.name, has_ero, uncensored, released",
                     "results": 100
                 })
             )
@@ -2762,7 +2764,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         if (notFound.size < 1) return
         content.insertAdjacentHTML('beforeend', `
 <p style="color: #b7adb5; grid-column: span ${GM_getValue('columns')}">
-<span style="font-weight: bold; color: inherit">Not Found</span>: ${Array.from(notFound).join(', ')}
+<span style="font-weight: bold; color: inherit">Not Found</span>: ${Array.from(notFound).join("<span style='color: white;'>, </span>")}
 </p>`)
         notFound.clear()
     }
@@ -2908,19 +2910,19 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
             .then(r => r.json())
             .then(r => {
                 let [, names, , path] = r
-                names = names.filter(n => n.toLowerCase().startsWith(searchValue))
-                if (names.length < 1) {
-                    notFound.add(searchValue)
-                    return
-                }
-                func(names.map((n, i) => {
+                const obj = names.map((n, i) => {
                     const [, name, category] = /(.*)\((.*?)\)$/.exec(n)
                     return {
                         category: category,
                         id: /\d+/.exec(path[i])[0],
                         name: name.trim()
                     }
-                }))
+                }).filter(o => o.name.toLowerCase().startsWith(searchValue))
+                if (Object.keys(obj).length === 0) {
+                    notFound.add(searchValue)
+                    return
+                }
+                func(obj)
             })
             .catch(r => {
                 console.error(r)
