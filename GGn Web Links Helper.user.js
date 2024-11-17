@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.2
+// @version      1.4.3
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -32,7 +32,6 @@ if (typeof GM_getValue('refresh_after_submit') === 'undefined')
     GM_setValue('refresh_after_submit', false)
 if (typeof GM_getValue('default_unchecked') === 'undefined')
     GM_setValue('default_unchecked', false)
-
 
 
 let auto_search = GM_getValue('auto_search')
@@ -287,7 +286,7 @@ async function runGroup() {
                     <table>
                         <tbody id="wlhelper-links"></tbody>
                     </table>
-                        <input type="submit" style="margin-right: 15px;">
+                    <input type="submit" style="margin-right: 15px;">
                 </form>
             </section>
         `)
@@ -769,7 +768,7 @@ function searchHLTB(groupname) {
             const doc = parseDoc(r)
             const script = doc.querySelector("script[src*=_app]")
             promiseXHR(`${getFullURL(r, script)}`).then(r => {
-                const path = /"\/api\/search\/"\.concat\("([^"]+)"\)/.exec(r.responseText)?.[1]
+                const path = /"\/api\/search\/"\.concat\("([^"]+)"\).concat\("([^"]+)"\)/.exec(r.responseText)
 
                 searchAndAddElements('howlongtobeaturi', (r, tr, ld) => {
                     const data = r.response.data
@@ -778,7 +777,7 @@ function searchHLTB(groupname) {
                         const {game_id, game_name} = data[i]
                         setAnchorProperties(addElementsToRow(tr, ld, i), game_name, `https://howlongtobeat.com/game/${game_id}`)
                     }
-                }, `https://howlongtobeat.com/api/search/${path ?? ''}`, {
+                }, `https://howlongtobeat.com/api/search/${path?.[1] + path?.[2] ?? ''}`, {
                     method: 'POST',
                     headers: {
                         referer: 'https://howlongtobeat.com',
@@ -795,7 +794,7 @@ function searchHLTB(groupname) {
 
 async function searchVNDB(groupname) {
     const aliases = document.querySelector('#group_aliases strong')
-        ?.nextSibling.textContent.split(', ').filter(a => !/[A-Z]{2}\d{4,}/.test(a)) // remove DLsite codes
+        ?.nextSibling.textContent.split(', ').filter(a => a && !/[A-Z]{2}\d{4,}/.test(a)) // remove empty strings caused by DLsite Code Linkify and remove DLsite codes if without it
 
     const titles = [groupname, ...aliases || []]
     for (const title of titles) {
