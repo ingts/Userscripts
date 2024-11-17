@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.4
+// @version      1.1.5
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2961,12 +2961,12 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         for (const [id, name] of publishers) {
             insertLabel(id, name)
         }
-        for (const name of foundPublishersArray) {
-            await findCollections(name, r => {
+        for (const pubname of foundPublishersArray) {
+            await findCollections(pubname, r => {
                 r.forEach(({category, id, name}) => {
                     if (category === 'Publisher')
                         insertLabel(id, name)
-                    else notFound.add(name)
+                    else notFound.add(pubname)
                 })
             })
         }
