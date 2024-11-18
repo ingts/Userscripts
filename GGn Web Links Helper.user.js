@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.3
+// @version      1.4.4
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -66,7 +66,7 @@ const consoleAndPcSites = [
 ]
 
 const commonPcSites = [
-    ['Steam', 'https://store.steampowered.com/search/?term=NAME&amp;category1=998', 'steamuri', '^(https?:\\/\\/|)store\\.steampowered\\.com\\/(app|sub)\\/.*?$'],
+    ['Steam', 'https://store.steampowered.com/search/?term=NAME&amp;category1=998&amp;ndl=1', 'steamuri', '^(https?:\\/\\/|)store\\.steampowered\\.com\\/(app|sub)\\/.*?$'],
     ['GOG', 'https://www.gog.com/games?query=NAME', 'goguri', '^(https?:\\/\\/|)(www.|)gog\\.com\\/(en\\/)?game\\/.*?$'],
     ['Humble Bundle', 'https://www.humblebundle.com/store/search?search=NAME', 'humbleuri', '.*'],
     ['PCGamingWiki', 'https://pcgamingwiki.com/w/index.php?search=NAME&fulltext=1', 'pcwikiuri', '^(https?:\\/\\/|)(www.|)pcgamingwiki\\.com\\/wiki\\/.*?$'],
@@ -685,8 +685,9 @@ function searchSites(groupname, encodedGroupname) {
 
     searchAndAddElements('steamuri', (r, tr, ld) => {
         const doc = parseDoc(r)
-        const arrayLike = doc.querySelectorAll('#search_result_container a')
-        const anchors = Array.from(arrayLike)
+        const nodeList = doc.querySelectorAll('#search_result_container a')
+        if (nodeList.length < 1) throw Error('notfound', {cause: 'notfound'})
+        const anchors = Array.from(nodeList)
         anchors.forEach(anchor => anchor.href = /.*\/app\/\d+\//.exec(anchor.href)?.[0] ?? anchor.href) // don't want stuff after the number
         const years = doc.querySelectorAll('.col.search_released.responsive_secondrow')
         for (let i = 0; i < Math.min(max_results, anchors.length); i++) {
