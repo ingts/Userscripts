@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.4
+// @version      1.4.5
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -647,7 +647,7 @@ function searchReviews() {
             const {criticScoreSummary: {score}, title, slug} = ratedGames[i]
             setAnchorProperties(addElementsToRow(tr, ld, i), `${title} (${score})`, `https://www.metacritic.com/game/${slug}`)
         }
-    }, `https://internal-prod.apigee.fandom.net/v1/xapi/finder/metacritic/search/${encodedGroupname}/web?mcoTypeId=13&limit=10`, {responseType: "json"})
+    }, `https://backend.metacritic.com/v1/xapi/finder/metacritic/search/${encodedGroupname}/web?apiKey=1MOZgmNFxvmljaQR1X9KAij9Mo4xAY3u&mcoTypeId=13&limit=10`, {responseType: "json"})
 
     searchAndAddElements('ignuri', googleSearchSelector)
     searchAndAddElements('gamespotscoreuri', '#js-sort-filter-results span > a')
@@ -697,11 +697,17 @@ function searchSites(groupname, encodedGroupname) {
     searchAndAddElements('goguri', ['.paginated-products-grid a', 'product-title'])
     searchAndAddElements('humbleuri', '.entity-title')
     searchAndAddElements('itchuri', '.game_title a')
-    searchAndAddElements('pcwikiuri', 'h2:nth-of-type(2) + ul a') // Page text matches
+    searchAndAddElements('pcwikiuri', (r, tr, ld) => {
+        const [, titles, ,links] = r.response
+        if (titles.length) throw Error('notfound', {cause: 'notfound'})
+        for (let i = 0; i < Math.min(max_results, titles.length); i++) {
+            setAnchorProperties(addElementsToRow(tr, ld, i), titles[i], links[i])
+        }
+    }, `https://www.pcgamingwiki.com/w/api.php?action=opensearch&format=json&formatversion=2&search=${encodedGroupname}`)
     searchAndAddElements('nexusmodsuri', '.mod-image')
 
     searchAndAddElements('epicgamesuri', googleSearchSelector,
-        `https://www.google.com/search?q=site:store.epicgames.com+${encodedGroupname}`) // search google because epic store results are duplicated for some reason
+        `https://www.google.com/search?q=site:store.epicgames.com+${encodedGroupname}`)
 
     searchAndAddElements('psnuri', (r, tr, ld) => {
         const doc = parseDoc(r)
