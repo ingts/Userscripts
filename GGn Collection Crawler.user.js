@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5
+// @version      1.1.5.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -1646,7 +1646,7 @@ async function main() {
         [2471, 3039], // Futanari on Female
         [1187, 3039], // Futanari Protagonist
         [625, 3039], // Futanari Support Character
-        [2444, 3039], //  Male on Futanari
+        [2444, 3039], // Male on Futanari
         [3390, 3039], // Only Futanari Heroines
 
         [5, 3994], // Vampire
@@ -1666,13 +1666,21 @@ async function main() {
         [455, 4502], // Slice of Life Realism
 
         [1170, 7831], // Bara
-        [1328, 7831], //  Group Sex of Several Males
-        [3065, 7831], //  Male on Male Sex Only
-        [3674, 7831], //  Gay Male Domination
+
+        [83, 3033], // Male on Male Sex
+        [1328, 3033], // Group Sex of Several Males
+        [3065, 3033], // Male on Male Sex Only
+        [3674, 3033], // Gay Male Domination
+        [2846, 3033], // Yaoi Game Jam
+        [2656, 3033], // Male Homosexual NTR
+        [728, 3033], // Male on Male Rape
+        [98, 3033], // Boy x Boy Romance
+        [2047, 3033], // Gay Shotacon
+        [1820, 3033], // Reversible Yaoi Pairing
 
         [897, 4908], // Scat
-        [2902, 4908], //  Scat Filter
-        [3494, 4908], //  Scat on Others
+        [2902, 4908], // Scat Filter
+        [3494, 4908], // Scat on Others
 
         [2403, 6701], // Gyaru
         [3495, 6701], // Bimbofication
