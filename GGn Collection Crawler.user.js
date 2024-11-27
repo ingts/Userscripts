@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.1
+// @version      1.1.5.2
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -358,7 +358,6 @@ async function main() {
         [6829, "Macro Environment"],
         [6865, "Games Removed From Google Play"],
         [6870, "Worlds of power"],
-        [7027, "Colorful"],
         [7039, "Card Battler"],
         [7043, "Never-Ending"],
         [7060, "Grappling Hook"],
@@ -1252,7 +1251,6 @@ async function main() {
 
     const steamThemes = new Map([
         ["free to play", 156],
-        ["colorful", 7027],
         ["pixel graphics", 8817],
         ["female protagonist", 856],
         ["physics", 5498],
@@ -1811,7 +1809,6 @@ async function main() {
         ["female protagonist", 856],
         ["space", 6751],
         ["gay", 3033],
-        ["colorful", 7027],
         ["furry", 7472],
         ["artgame", 7955],
         ["medieval", 5515],
