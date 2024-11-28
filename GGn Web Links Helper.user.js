@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.5
+// @version      1.4.6
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -792,7 +792,27 @@ function searchHLTB(groupname) {
                     },
                     responseType: "json",
                     data: JSON.stringify({
-                        searchTerms: groupname.split(' ')
+                        "searchType": "games",
+                        "searchTerms": groupname.split(' '),
+                        "size": max_results,
+                        "searchOptions": {
+                            "games": {
+                                "userId": 0,
+                                "platform": "",
+                                "sortCategory": "popular",
+                                "rangeCategory": "main",
+                                "rangeTime": {
+                                    "min": null,
+                                    "max": null
+                                },
+                                "gameplay": {
+                                    "perspective": "",
+                                    "flow": "",
+                                    "genre": "",
+                                    "subGenre": " "
+                                }
+                            }
+                        }
                     })
                 })
             })
