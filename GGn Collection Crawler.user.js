@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.2
+// @version      1.1.5.3
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -212,7 +212,7 @@ async function main() {
         return
     }
 
-    // every theme collection except those with GGn in the name, Visual Novels (1792), Hentai Role-Playing Games (11865) as of 2024-11-151. later ones are added only if they can be found
+    // every theme collection except those with GGn in the name, Visual Novels (1792), Hentai Role-Playing Games (11865). later ones are added only if they can be found
     const themesMap = new Map([
         [49, "MOMA's Video Game Collection"],
         [62, "English Translated Visual Novels"],
@@ -469,7 +469,6 @@ async function main() {
         [10744, "Biopunk Games"],
         [10858, "Kaiju"],
         [10864, "Epic MegaGrants"],
-        [10872, "Vehicular Combat"],
         [10887, "Vertical Shoot 'em ups"],
         [10918, "Native Korean Visual Novels"],
         [10931, "Cosa Nostra"],
@@ -541,6 +540,7 @@ async function main() {
         [12146, "Werewolves"],
         [12235, "Political-themed Games"],
         [12236, "Aliens"],
+        [12241, "PSX Style Horror Games"],
     ])
 
     const adultThemes = new Set(
@@ -1273,7 +1273,6 @@ async function main() {
         ["hand-drawn graphics", 10973],
         ["lovecraftian", 1989],
         ["mechs", 5287],
-        ["vehicular combat", 10872],
         ["world war ii", 673],
         ["lgbtq+", 130],
         ["villain protagonist", 4859],
@@ -1895,7 +1894,6 @@ async function main() {
         ["rail shooter", 6556],
         ["voice control", 9617],
         ["mecha / giant robot", 5287],
-        ["vehicular combat", 10872],
         ["cyberpunk / dark sci-fi", 3622],
         ["egypt (ancient)", 9238],
         ["post-apocalyptic", 585],
@@ -1986,7 +1984,6 @@ async function main() {
         [7614, 10464], // Setting: Mars
         [7966, 10666], // Enhanced remakes
         [18242, 10858], // Theme: Kaiju
-        [9635, 10872], // Genre: Car / motorcycle combat
         [9586, 10887], // Genre: Scrolling shoot 'em up
         [10383, 10963], // Genre: Reversed tower defense
         [4916, 11277], // Gameplay feature: Photography
@@ -2052,7 +2049,6 @@ async function main() {
         ["JRPG", 1232],
         ["Metroidvania", 155],
         ["Rail shooter", 6556],
-        ["Vehicle combat", 10872],
         ["Wargame", 11840],
         ["Quick time events", 12098],
         ["tricks", 12124],
@@ -2290,6 +2286,11 @@ async function main() {
             const tags = getLowercaseTextFromElements(doc, 'a[href*=tag-]', sitename)
             if (!tags) return
             addCollectionIds(tags, itchioThemes, foundThemes)
+            if (tags.includes('horror')) {
+                if (tags.includes('ps1') || tags.includes('psx (playstation)')) {
+                    foundThemes.add(12241) // PSX Style Horror Games
+                }
+            }
             addCollectionIds(tags, itchioFeatures, foundFeatures)
 
             const authors = getNodeByXPath(doc, ".//table//td[contains(text(), 'Author')]").nextElementSibling
