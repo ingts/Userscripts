@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         GGn Title and Screenshots Formatter
+// @name         GGn Title Formatter
 // @namespace    none
-// @version      26
-// @description  Formats title, sets alias if applicable and has buttons to undo. Removes screenshots until they are a multiple of 4. Adds buttons in edit page to format name and alias. Exposes title case function to other scripts
+// @version      27
+// @description  Formats title, sets alias if applicable and has buttons to undo. Adds buttons in edit page to format name and alias. Exposes title case function to other scripts
 // @author       ingts
 // @match        https://gazellegames.net/upload.php
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -166,25 +166,6 @@ if (location.href.includes('upload.php')) {
         }).observe(document.getElementById('dynamic_form'), {childList: true, subtree: true})
     })
     startTextFormat(true)
-
-
-    const screenshotInputs = document.getElementsByName('screens[]')
-    const removeButton = document.querySelector("#image_block > a:nth-of-type(2)")
-    const sInterval = setInterval(() => {
-        for (let i = 0; i < screenshotInputs.length; i++) {
-            if (!screenshotInputs[i].value) {
-                return
-            }
-        }
-        const number = screenshotInputs.length < 4 ? screenshotInputs.length : Math.min(Math.floor(screenshotInputs.length / 4) * 4, 20)
-        while (screenshotInputs.length > number) {
-            removeButton.click()
-        }
-        clearInterval(sInterval)
-    }, 1000)
-    document.querySelector("#image_block > a:nth-of-type(1)").addEventListener('click', () => {
-        clearInterval(sInterval)
-    })
 } else if (location.href.includes('editgroup')) {
     titleInput = document.querySelector("input[name=name]")
     aliasInput = document.querySelector('input[name=aliases]')
