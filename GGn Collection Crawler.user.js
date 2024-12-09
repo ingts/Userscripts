@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.3
+// @version      1.1.5.4
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -530,7 +530,6 @@ async function main() {
         [11827, "Traditional Roguelikes"],
         [11829, "AI Generated Art"],
         [11830, "Asset Flip"],
-        [11840, "Wargame"],
         [12086, "Games Based on Folklore/Fables"],
         [12089, "Greek Mythology"],
         [12096, "Vikings"],
@@ -547,7 +546,7 @@ async function main() {
         [1793, 1794, 3039, 3041, 3185, 4908, 5129, 5366, 5844, 5845, 5846, 6233, 7831, 11341, 11642, 11751, 11754, 11769, 117770, 11801, 11805,]
     )
 
-    // every feature collection (as of 2023-12-05)
+    // every feature collection except Character Creation
     const featuresMap = new Map([
         [23, "Cracked Online Multiplayer"],
         [39, "Games For Windows: LIVE"],
@@ -1314,7 +1313,6 @@ async function main() {
         ["turn-based", 3813],
 
         ["traditional roguelike", 11827],
-        ["wargame", 11840],
         ["vikings", 12096],
         ["twin stick shooter", 12127],
         ["werewolves", 12146],
@@ -1914,7 +1912,6 @@ async function main() {
         ["turn-based tactics (tbt)", 3813],
 
         ["prehistoric", 5515],
-        ["wargame", 11840],
         ["tricks / stunts", 12124],
     ])
 
@@ -2049,7 +2046,6 @@ async function main() {
         ["JRPG", 1232],
         ["Metroidvania", 155],
         ["Rail shooter", 6556],
-        ["Wargame", 11840],
         ["Quick time events", 12098],
         ["tricks", 12124],
 
