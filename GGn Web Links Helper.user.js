@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.7
+// @version      1.4.8
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -809,7 +809,7 @@ function searchHLTB(groupname) {
                                     "perspective": "",
                                     "flow": "",
                                     "genre": "",
-                                    "subGenre": " "
+                                    "difficulty": ""
                                 }
                             }
                         }
@@ -886,6 +886,7 @@ async function findGameFaqsPlatformPage(url, platform, input) {
         ["PlayStation 2", "PlayStation 2"],
         ["PlayStation 3", "PlayStation 3"],
         ["PlayStation 4", "PlayStation 4"],
+        ["PlayStation 5", "PlayStation 5"],
         ["PlayStation Portable", "PSP"],
         ["PlayStation Vita", "PlayStation Vita"],
         ["Dreamcast", "Dreamcast"],
