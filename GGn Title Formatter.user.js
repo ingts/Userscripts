@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Title Formatter
 // @namespace    none
-// @version      27
+// @version      28
 // @description  Formats title, sets alias if applicable and has buttons to undo. Adds buttons in edit page to format name and alias. Exposes title case function to other scripts
 // @author       ingts
 // @match        https://gazellegames.net/upload.php
@@ -44,7 +44,7 @@ globals.toTitleCase = function (str, alias) {
     const allUppercase = new Set(['rpg', 'fps', 'tps', 'rts', 'tbs', 'mmo', 'mmorpg', 'arpg', 'jrpg', 'pvp', 'pve', 'ntr', 'td', 'vr', 'npc', 'ost'])
 
     return str
-        .replace(/\s/g, ' ')
+        .replace(/\s/g, ' ').replace('—', ' - ')
         .replace(/ ~ /, ': ').replace(/ ~/, ': ').replace(/~$/, '').replace(/ ~$/, '').replace(/ - /, ': ').replace(/ -/, ': ').replace(/-$/, '').replace(/^-/, '')
         .replace('™', '').replace('®', '')
         .toLowerCase().trim()
