@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.8
+// @version      1.4.9
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -686,7 +686,7 @@ function searchSites(groupname, encodedGroupname) {
     searchAndAddElements('steamuri', (r, tr, ld) => {
         const doc = parseDoc(r)
         const nodeList = doc.querySelectorAll('#search_result_container a')
-        if (nodeList.length < 1) throw Error('notfound', {cause: 'notfound'})
+        throwNotFound(nodeList)
         const anchors = Array.from(nodeList)
         anchors.forEach(anchor => anchor.href = /.*\/app\/\d+\//.exec(anchor.href)?.[0] ?? anchor.href) // don't want stuff after the number
         const years = doc.querySelectorAll('.col.search_released.responsive_secondrow')
@@ -698,12 +698,12 @@ function searchSites(groupname, encodedGroupname) {
     searchAndAddElements('humbleuri', '.entity-title')
     searchAndAddElements('itchuri', '.game_title a')
     searchAndAddElements('pcwikiuri', (r, tr, ld) => {
-        const [, titles, ,links] = r.response
-        if (titles.length) throw Error('notfound', {cause: 'notfound'})
+        const [, titles, , links] = r.response
+        throwNotFound(titles)
         for (let i = 0; i < Math.min(max_results, titles.length); i++) {
             setAnchorProperties(addElementsToRow(tr, ld, i), titles[i], links[i])
         }
-    }, `https://www.pcgamingwiki.com/w/api.php?action=opensearch&format=json&formatversion=2&search=${encodedGroupname}`)
+    }, `https://www.pcgamingwiki.com/w/api.php?action=opensearch&format=json&formatversion=2&search=${encodedGroupname}`, {responseType: "json"})
     searchAndAddElements('nexusmodsuri', '.mod-image')
 
     searchAndAddElements('epicgamesuri', googleSearchSelector,
