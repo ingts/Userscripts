@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Title Formatter
 // @namespace    none
-// @version      28
+// @version      29
 // @description  Formats title, sets alias if applicable and has buttons to undo. Adds buttons in edit page to format name and alias. Exposes title case function to other scripts
 // @author       ingts
 // @match        https://gazellegames.net/upload.php
@@ -45,7 +45,7 @@ globals.toTitleCase = function (str, alias) {
 
     return str
         .replace(/\s/g, ' ').replace('—', ' - ')
-        .replace(/ ~ /, ': ').replace(/ ~/, ': ').replace(/~$/, '').replace(/ ~$/, '').replace(/ - /, ': ').replace(/ -/, ': ').replace(/-$/, '').replace(/^-/, '')
+        .replace(/~$/, '').replace(/ ~$/, '').replace(/-$/, '').replace(/^-/, '').replace(/ ~ /, ': ').replace(/ ~/, ': ').replace(/ - /, ': ').replace(/ -/, ': ')
         .replace('™', '').replace('®', '')
         .toLowerCase().trim()
         .split(wordSeparators)
