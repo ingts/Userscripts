@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.4
+// @version      1.1.5.5
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2834,6 +2834,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         }
 
         const uncheck = new Set([
+            1232, // Japanese Role-Playing Games because only Japanese developed games should be added
             10887,
             11320,
             // Games With an Unofficial * Translation
