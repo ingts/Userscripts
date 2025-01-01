@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.9
+// @version      1.4.10
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -695,7 +695,14 @@ function searchSites(groupname, encodedGroupname) {
         }
     })
     searchAndAddElements('goguri', ['.paginated-products-grid a', 'product-title'])
-    searchAndAddElements('humbleuri', '.entity-title')
+    searchAndAddElements('humbleuri', (r, tr, ld) => {
+        const results = r.response.results
+        if (results.length < 1) throw Error('notfound', {cause: 'notfound'})
+        for (let i = 0; i < Math.min(max_results, results.length); i++) {
+            setAnchorProperties(addElementsToRow(tr, ld, i), results[i].human_name, `https://www.humblebundle.com/store/${results[i].human_url}`)
+        }
+    }, `https://www.humblebundle.com/store/api/search?search=${encodedGroupname}&request=1`, {responseType: "json"})
+
     searchAndAddElements('itchuri', '.game_title a')
     searchAndAddElements('pcwikiuri', (r, tr, ld) => {
         const [, titles, , links] = r.response
@@ -775,7 +782,7 @@ function searchHLTB(groupname) {
             const doc = parseDoc(r)
             const script = doc.querySelector("script[src*=_app]")
             promiseXHR(`${getFullURL(r, script)}`).then(r => {
-                const path = /"\/api\/find\/"\.concat\("([^"]+)"\).concat\("([^"]+)"\)/.exec(r.responseText)
+                const path = /"\/api\/lookup\/"\.concat\("([^"]+)"\).concat\("([^"]+)"\)/.exec(r.responseText)
 
                 searchAndAddElements('howlongtobeaturi', (r, tr, ld) => {
                     const data = r.response.data
@@ -784,7 +791,7 @@ function searchHLTB(groupname) {
                         const {game_id, game_name} = data[i]
                         setAnchorProperties(addElementsToRow(tr, ld, i), game_name, `https://howlongtobeat.com/game/${game_id}`)
                     }
-                }, `https://howlongtobeat.com/api/find/${path[1] + path[2]}`, {
+                }, `https://howlongtobeat.com/api/lookup/${path[1] + path[2]}`, {
                     method: 'POST',
                     headers: {
                         referer: 'https://howlongtobeat.com',
