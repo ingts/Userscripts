@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.5
+// @version      1.1.5.6
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -512,6 +512,7 @@ async function main() {
         [11519, "My Little Pony Fangames"],
         [11545, "Metal Gear Solid: Master Collection Vol.1"],
         [11546, "Club Nintendo rewards"],
+        // [11554, "Flying Character"], ?
         [11571, "SsethTzeentach's Featured Games"],
         [11615, "Nintendo Gamecube Exclusives"],
         [11642, "Tentacles (18+)"],
@@ -609,7 +610,9 @@ async function main() {
         [11405, "Dreamcast Live Compatible"],
         [11486, "AMD FSR Support"],
         [11547, "Intel XeSS Support"],
-        [11554, "Flying games"]
+        [11661, "Oculus Quest 2"],
+        [11935, "Starpath Supercharger"],
+        [12130, "Nintendo 64DD"],
     ])
 
     // every franchise collection (as of 2024-09-01)
@@ -1016,6 +1019,29 @@ async function main() {
         [11850, "Zone of the Enders"],
         [11874, "Sker"],
         [11903, "Age of Empires"],
+        [11920, "Q*bert"],
+        [11922, "Berzerk (1980)"],
+        [11923, "Centipede"],
+        [11966, "E.T. The Extra-Terrestrial"],
+        [12026, "TwinBee"],
+        [12027, "WWE"],
+        [12047, "Fairy Tail"],
+        [12085, "The Flintstones"],
+        [12087, "The Jetsons"],
+        [12103, "Strawberry Shortcake"],
+        [12104, "Care Bears"],
+        [12135, "Nauseous Pines / Uriel's Chasm"],
+        [12144, "Rocky Horror Show"],
+        [12158, "Buck Rogers"],
+        [12174, "World of Wilderness"],
+        [12272, "Space Invaders"],
+        [12273, "Yars' Revenge"],
+        [12274, "Stargate"],
+        [12308, "Return 2 Games"],
+        [12315, "Adibou"],
+        [12355, "Torrente"],
+        [12399, "The Legend of Heroes"],
+        [12406, "Umamusume Pretty Derby"],
     ]
 
     // every engine collection (as of 2024-08-21)
