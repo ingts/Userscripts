@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.6
+// @version      1.1.5.7
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -410,7 +410,7 @@ async function main() {
         [8155, "Dieselpunk"],
         [8194, "Tanks"],
         [8195, "Naval"],
-        [8200, "Games Based on Novels"],
+        [8200, "Games Based on Novels, Novellas and Short Stories"],
         [8307, "Gambling"],
         [8524, "Pre-installed Mac games"],
         [8817, "Pixel Graphics"],
