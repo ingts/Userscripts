@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.10
+// @version      1.4.11
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -782,7 +782,7 @@ function searchHLTB(groupname) {
             const doc = parseDoc(r)
             const script = doc.querySelector("script[src*=_app]")
             promiseXHR(`${getFullURL(r, script)}`).then(r => {
-                const path = /"\/api\/lookup\/"\.concat\("([^"]+)"\).concat\("([^"]+)"\)/.exec(r.responseText)
+                const path = /"\/api\/s\/"\.concat\("([^"]+)"\).concat\("([^"]+)"\)/.exec(r.responseText)
 
                 searchAndAddElements('howlongtobeaturi', (r, tr, ld) => {
                     const data = r.response.data
@@ -791,7 +791,7 @@ function searchHLTB(groupname) {
                         const {game_id, game_name} = data[i]
                         setAnchorProperties(addElementsToRow(tr, ld, i), game_name, `https://howlongtobeat.com/game/${game_id}`)
                     }
-                }, `https://howlongtobeat.com/api/lookup/${path[1] + path[2]}`, {
+                }, `https://howlongtobeat.com/api/s/${path[1] + path[2]}`, {
                     method: 'POST',
                     headers: {
                         referer: 'https://howlongtobeat.com',
