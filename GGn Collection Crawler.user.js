@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.7
+// @version      1.1.5.8
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -1044,7 +1044,7 @@ async function main() {
         [12406, "Umamusume Pretty Derby"],
     ]
 
-    // every engine collection (as of 2024-08-21)
+    // every engine collection
     const enginesMap = new Map([
         ["Creation Engine", 175],
         ["ScummVM", 199],
@@ -1271,7 +1271,8 @@ async function main() {
         ["VOCALOID", 11523],
         ["Divinity Engine", 11613],
         ["mTropolis", 11815],
-        ["Phaser Engine", 11882]
+        ["Phaser Engine", 11882],
+        ["Katana Engine", 12445],
     ])
 
     const steamThemes = new Map([
