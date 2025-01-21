@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.8
+// @version      1.1.5.10
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -612,7 +612,7 @@ async function main() {
         [11547, "Intel XeSS Support"],
         [11661, "Oculus Quest 2"],
         [11935, "Starpath Supercharger"],
-        [12130, "Nintendo 64DD"],
+        [12428, "Photo Mode"],
     ])
 
     // every franchise collection (as of 2024-09-01)
@@ -2029,6 +2029,7 @@ async function main() {
         [9599, 12127], // Genre: Dual / Twin-stick shooter
         [7907, 12146], // Theme: Werewolves
         [9660, 12236], // Protagonist: Extraterrestrial / Alien
+        [11123, 12428], // Game feature: Free camera photo mode (will be changed to feature)
     ])
 
     // https://www.mobygames.com/attributes/tech-specs
@@ -2851,6 +2852,10 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         if (foundThemes.has(10887) || foundThemes.has(11320)) { // Vertical or Horizontal Shoot 'em ups
             foundThemes.add(10887) // Vertical Shoot 'em ups
             foundThemes.add(11320) // Horizontal Shoot 'em ups
+        }
+        if (foundThemes.has(12428)) {
+            foundFeatures.add(12428)
+            foundThemes.delete(12428)
         }
         if (groupIsAdult)
             foundThemes.delete(1232) // Japanese Role-Playing Games
