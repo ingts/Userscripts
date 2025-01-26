@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.10
+// @version      1.1.5.11
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -541,6 +541,7 @@ async function main() {
         [12235, "Political-themed Games"],
         [12236, "Aliens"],
         [12241, "PSX Style Horror Games"],
+        [12475, "Robot/Android Protagonist"],
     ])
 
     const adultThemes = new Set(
@@ -2030,6 +2031,7 @@ async function main() {
         [7907, 12146], // Theme: Werewolves
         [9660, 12236], // Protagonist: Extraterrestrial / Alien
         [11123, 12428], // Game feature: Free camera photo mode (will be changed to feature)
+        [9663, 12475], // Protagonist: Robot
     ])
 
     // https://www.mobygames.com/attributes/tech-specs
