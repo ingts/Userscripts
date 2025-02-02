@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Steam Uploady (edited)
 // @namespace    https://gazellegames.net/
-// @version      17
+// @version      18
 // @description  Fill upload form with Steam info. Edited from "GGn New Uploady"
 // @author       NeutronNoir, ZeDoCaixao, ingts
 // @match        https://gazellegames.net/upload.php*
@@ -427,7 +427,7 @@ function fill_form(response) {
         $("#metauri").val(gameInfo.metacritic.url.split("?")[0] + "/critic-reviews")
     }
     if (gameInfo.hasOwnProperty('movies')) {
-        $("#trailer").val(gameInfo.movies[0].webm.max.split("?")[0])
+        $("#trailer").val(gameInfo.movies[0].webm.max.split("?")[0].replace("http:", "https:"))
     }
 }
 
