@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.11
+// @version      1.1.5.12
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -614,6 +614,8 @@ async function main() {
         [11661, "Oculus Quest 2"],
         [11935, "Starpath Supercharger"],
         [12428, "Photo Mode"],
+        [12520, "Colorblind Mode"],
+        [12520, "Colorblind Mode"],
     ])
 
     // every franchise collection (as of 2024-09-01)
@@ -1274,6 +1276,7 @@ async function main() {
         ["mTropolis", 11815],
         ["Phaser Engine", 11882],
         ["Katana Engine", 12445],
+        ["RapidFire", 12521],
     ])
 
     const steamThemes = new Map([
@@ -2030,7 +2033,6 @@ async function main() {
         [9599, 12127], // Genre: Dual / Twin-stick shooter
         [7907, 12146], // Theme: Werewolves
         [9660, 12236], // Protagonist: Extraterrestrial / Alien
-        [11123, 12428], // Game feature: Free camera photo mode (will be changed to feature)
         [9663, 12475], // Protagonist: Robot
     ])
 
@@ -2134,6 +2136,7 @@ async function main() {
         ["Play area standing", 1118],
         ["Play area room scale", 1119],
         ["Ray tracing", 6900],
+        ["Color blind", 12520],
     ])
 
     const pcgwFeatures_Substring = [ // match key and value. Values are checked if they are included in the string
@@ -2448,15 +2451,24 @@ async function main() {
             addDevsPubs(doc.querySelectorAll('#developerLinks a'), foundDevelopers)
             addDevsPubs(doc.querySelectorAll('#publisherLinks a'), foundPublishers)
             let groups = Array.from(doc.querySelectorAll('.badge.text-ellipsis a'))
-            for (const a of groups) {
-                if (['engine:', 'middleware:'].some(str => a.textContent.toLowerCase().includes(str))) {
-                    foundEngines.add(a.textContent.replace(/^.*?: /, '')) // remove text before first colon and space
-                    continue
+            groups.filter(group => {
+                if (['engine:', 'middleware:'].some(str => group.textContent.toLowerCase().includes(str))) {
+                    foundEngines.add(group.textContent.replace(/^.*?: /, '')) // remove text before first colon and space
+                    return true
                 }
-                if (a.textContent.includes('series')) {
-                    foundSeries = a.textContent.replace('series', '').trim()
+                if (group.textContent.includes('series')) {
+                    foundSeries = group.textContent.replace('series', '').trim()
+                    return true
                 }
-            }
+                switch (/\d+/.exec(group.href)[0]) {
+                    case "11123": // Game feature: Free camera photo mode
+                        foundFeatures.add(12428)
+                        return false
+                    case "14859": // Gameplay feature: Color-blind mode
+                        foundFeatures.add(12520)
+                        return false
+                }
+            })
             addCollectionIds(groups.map(a => /\d+/.exec(a.href)[0]), mobygamesThemes_Groups, foundThemes, true)
 
             const specsLink = doc.querySelector('span.text-nowrap')?.firstElementChild
@@ -2575,6 +2587,7 @@ async function main() {
     VR_support.Play_area_room_scale,
     Video.Upscaling,
     Video.Ray_tracing,
+    Video.Color_blind,
     &join_on=Infobox_game._pageName=VR_support._pageName,Infobox_game._pageName=Input._pageName,Infobox_game._pageName=Multiplayer._pageName,Infobox_game._pageName=Video._pageName&
     where=Infobox_game._pageName="${websites.get("PCGamingWiki").href.split('/')[4].replace(/_/g, ' ')}"&format=json`, {responseType: "json"})
     }
