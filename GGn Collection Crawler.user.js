@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.5.12
+// @version      1.1.6
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -2454,11 +2454,11 @@ async function main() {
             groups.filter(group => {
                 if (['engine:', 'middleware:'].some(str => group.textContent.toLowerCase().includes(str))) {
                     foundEngines.add(group.textContent.replace(/^.*?: /, '')) // remove text before first colon and space
-                    return true
+                    return false
                 }
                 if (group.textContent.includes('series')) {
                     foundSeries = group.textContent.replace('series', '').trim()
-                    return true
+                    return false
                 }
                 switch (/\d+/.exec(group.href)[0]) {
                     case "11123": // Game feature: Free camera photo mode
@@ -2468,6 +2468,7 @@ async function main() {
                         foundFeatures.add(12520)
                         return false
                 }
+                return true
             })
             addCollectionIds(groups.map(a => /\d+/.exec(a.href)[0]), mobygamesThemes_Groups, foundThemes, true)
 
@@ -2867,10 +2868,6 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         if (foundThemes.has(10887) || foundThemes.has(11320)) { // Vertical or Horizontal Shoot 'em ups
             foundThemes.add(10887) // Vertical Shoot 'em ups
             foundThemes.add(11320) // Horizontal Shoot 'em ups
-        }
-        if (foundThemes.has(12428)) {
-            foundFeatures.add(12428)
-            foundThemes.delete(12428)
         }
         if (groupIsAdult)
             foundThemes.delete(1232) // Japanese Role-Playing Games
