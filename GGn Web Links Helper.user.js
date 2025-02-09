@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.11
+// @version      1.4.13
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -126,7 +126,7 @@ const ebookSites = [
 
 GM_addStyle( // language=css
     `
-        #wlhelper-search-all {
+        #wlhelper-search-all { /* for edit page */
             display: block;
             margin: 15px auto;
         }
@@ -239,6 +239,14 @@ async function runGroup() {
                 width: 100%;
                 display: flex;
                 flex-direction: column;
+            }
+            
+            #wlhelper .loading {
+                color: #736C70
+            }
+
+            #wlhelper .notfound {
+                color: #937f21
             }
         `)
 
@@ -777,53 +785,85 @@ function searchSites(groupname, encodedGroupname) {
 }
 
 function searchHLTB(groupname) {
-    promiseXHR("https://howlongtobeat.com/")
-        .then(r => {
-            const doc = parseDoc(r)
-            const script = doc.querySelector("script[src*=_app]")
-            promiseXHR(`${getFullURL(r, script)}`).then(r => {
-                const path = /"\/api\/s\/"\.concat\("([^"]+)"\).concat\("([^"]+)"\)/.exec(r.responseText)
+    const [tr, loading] = addLoadingToRow('howlongtobeaturi')
+    if (!tr) return
+    let endpoint = GM_getValue("hltb_endpoint")
 
-                searchAndAddElements('howlongtobeaturi', (r, tr, ld) => {
-                    const data = r.response.data
-                    if (data.length < 1) throw Error('notfound', {cause: 'notfound'})
-                    for (let i = 0; i < Math.min(max_results, data.length); i++) {
-                        const {game_id, game_name} = data[i]
-                        setAnchorProperties(addElementsToRow(tr, ld, i), game_name, `https://howlongtobeat.com/game/${game_id}`)
-                    }
-                }, `https://howlongtobeat.com/api/s/${path[1] + path[2]}`, {
-                    method: 'POST',
-                    headers: {
-                        referer: 'https://howlongtobeat.com',
-                        'Content-Type': 'application/json'
-                    },
-                    responseType: "json",
-                    data: JSON.stringify({
-                        "searchType": "games",
-                        "searchTerms": groupname.split(' '),
-                        "size": max_results,
-                        "searchOptions": {
-                            "games": {
-                                "userId": 0,
-                                "platform": "",
-                                "sortCategory": "popular",
-                                "rangeCategory": "main",
-                                "rangeTime": {
-                                    "min": null,
-                                    "max": null
-                                },
-                                "gameplay": {
-                                    "perspective": "",
-                                    "flow": "",
-                                    "genre": "",
-                                    "difficulty": ""
-                                }
-                            }
-                        }
-                    })
+    function getEndpoint() {
+        return promiseXHR("https://howlongtobeat.com/")
+            .then(r => {
+                const doc = parseDoc(r)
+                const script = doc.querySelector("script[src*=_app]")
+                return promiseXHR(`${getFullURL(r, script)}`).then(r => {
+                    const a = /fetch\("\/api\/(\w+)\/"\.concat\("([^"]+)"\).concat\("([^"]+)"\)/.exec(r.responseText)
+                    const s = `${a[1]}/${a[2] + a[3]}`
+                    GM_setValue("hltb_endpoint", s)
+                    endpoint = s
                 })
             })
+    }
+
+    function run() {
+        return promiseXHR(`https://howlongtobeat.com/api/${endpoint}`, {
+            method: 'POST',
+            headers: {
+                referer: 'https://howlongtobeat.com',
+                'Content-Type': 'application/json'
+            },
+            responseType: "json",
+            data: JSON.stringify({
+                "searchType": "games",
+                "searchTerms": groupname.split(' '),
+                "size": max_results,
+                "searchOptions": {
+                    "games": {
+                        "userId": 0,
+                        "platform": "",
+                        "sortCategory": "popular",
+                        "rangeCategory": "main",
+                        "rangeTime": {
+                            "min": null,
+                            "max": null
+                        },
+                        "gameplay": {
+                            "perspective": "",
+                            "flow": "",
+                            "genre": "",
+                            "difficulty": ""
+                        }
+                    }
+                }
+            })
         })
+            .then(r => {
+                if (r.status === 404) throw Error('endpoint changed')
+                if (r.status !== 200) throw Error
+                const data = r.response.data
+                if (data.length < 1) throw Error('notfound', {cause: 'notfound'})
+                for (let i = 0; i < Math.min(max_results, data.length); i++) {
+                    const {game_id, game_name} = data[i]
+                    setAnchorProperties(addElementsToRow(tr, loading, i), game_name, `https://howlongtobeat.com/game/${game_id}`)
+                }
+            })
+    }
+
+    if (!endpoint) {
+        getEndpoint().then(run)
+    } else {
+        run().catch(e => {
+            if (e?.cause === 'notfound') {
+                loading.textContent = 'Nothing Found'
+                loading.className = 'notfound'
+            } else if (e?.message === 'endpoint changed') {
+                loading.textContent = 'Finding new endpoint'
+                getEndpoint().then(run)
+            } else {
+                console.error(e)
+                loading.textContent = 'Error'
+                loading.style.color = 'red'
+            }
+        })
+    }
 }
 
 async function searchVNDB(groupname) {
@@ -1011,17 +1051,24 @@ function addElementsToRow(tr, loading, index) {
     anchor.style.wordBreak = 'break-all'
     anchor.style.color = '#BBB4B8'
     label.append(anchor)
-    label.insertAdjacentHTML('beforeend', `<input type="checkbox" style="padding-left: 5px;" ${(index ? '' : default_unchecked ? '' : 'checked')}>`)
+    label.insertAdjacentHTML('beforeend',
+        `<input type="checkbox" style="padding-left: 5px;" ${(index > 0 ? '' : default_unchecked ? '' : 'checked')}>`) // check only first item
     return anchor
 }
 
-function searchAndAddElements(id, selectorsOrFunction, url, options) {
+function addLoadingToRow(id) {
     const tr = document.getElementById(id)?.closest('tr')
-    if (!tr || tr.querySelector('input[type=url]').value) return
+    if (!tr || tr.querySelector('input[type=url]').value) return []
     const loading = document.createElement('span')
     loading.textContent = 'Loading'
-    loading.style.color = '#736C70'
+    loading.className = 'loading'
     tr.children[1].append(loading)
+    return [tr, loading]
+}
+
+function searchAndAddElements(id, selectorsOrFunction, url, options) {
+    const [tr, loading] = addLoadingToRow(id)
+    if (!tr) return
 
     promiseXHR(url ?? tr.firstElementChild.querySelector('a').href, options)
         .then(async res => {
@@ -1053,9 +1100,9 @@ function searchAndAddElements(id, selectorsOrFunction, url, options) {
             }
         })
         .catch(e => {
-            if (e.cause && e.cause === 'notfound') {
+            if (e?.cause === 'notfound') {
                 loading.textContent = 'Nothing Found'
-                loading.style.color = '#937f21'
+                loading.className = 'notfound'
             } else {
                 console.error(url, e)
                 loading.textContent = 'Error'
@@ -1106,15 +1153,3 @@ function promiseXHR(url, options) {
         })
     })
 }
-
-// epic store
-/*
-    searchAndAddElements('epicgamesuri', (r, tr, ld) => {
-        const doc = parseDoc(r)
-        const anchors = doc.querySelectorAll('section a')
-        for (let i = 0; i < Math.min(max_results, anchors.length); i++) {
-            setAnchorProperties(addElementsToRow(tr, ld),
-                anchors[i].querySelector('div:nth-of-type(2)').querySelector('div:nth-of-type(2)').textContent, getFullURLFromAnchor(r, anchors[i]))
-        }
-    })
-*/
