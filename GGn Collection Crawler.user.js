@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.6
+// @version      1.1.7
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -89,7 +89,7 @@ if (location.href.includes('collections.php?id=') && GM_getValue('new_collection
     GM_deleteValue('new_collection')
 }
 
-if (location.hostname === "steamdb.info" && GM_getValue('check_steamdb', false)) {
+if (location.hostname === "steamdb.info" && GM_getValue('check_steamdb', true)) {
     if (document.getElementById('info')) {
         const info = {}
         const techLink = document.querySelector('tr a[href="/tech/"]')
@@ -2226,7 +2226,6 @@ async function main() {
             null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
     }
 
-
     if (websites.get("DLsite")) {
         processURL("DLsite", r => {
             const {genres, maker_name, maker_name_en, site_id, options} = r.response[0]
@@ -2281,12 +2280,10 @@ async function main() {
                     GM_deleteValue(key)
                     resolve(1)
                     if (!tech) return
-                    const engines = tech
-                        .filter(i => i.startsWith('Engine.') || i.startsWith('Emulator.'))
-                        .map(i => i.replace(/^.*?\./, '').replace('RenPy', "ren'py"))
+                    const engines = tech.filter(i => i.endsWith('Engine') || i.endsWith('Emulator')).map(i => i.replace('RenPy', "ren'py"))
                     addAllStrings(engines, foundEngines)
 
-                    const sdks = tech.filter(i => i.startsWith('SDK.')).map(i => i.replace(/^.*?\./, ''))
+                    const sdks = tech.filter(i => i.endsWith('SDK'))
                     const sdkEngines = new Map([
                         ["NWJS", "NW.js"],
                         ["NVIDIA PhysX", "PhysX Engine"],
@@ -2815,7 +2812,6 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         notFound.clear()
     }
 
-
     foundThemes.delete(null)
     foundThemes.delete(undefined)
     foundFeatures.delete(null)
@@ -2928,24 +2924,35 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
     }
 
     if (foundEngines.size > 0) {
-        insertHeader('Engine')
-        for (const name of foundEngines) {
+        let mappedEngines = []
+
+        foundEngines.forEach(name => {
             let found
             for (const [collectionName, id] of enginesMap) {
-                const nameL = name.toLowerCase()
-                const collectionNameL = collectionName.toLowerCase()
-                if (collectionNameL.includes(nameL) ||
-                    collectionNameL.replace('engine', '').includes(nameL.replace('engine', '')) ||
-                    collectionNameL.replace(/\d+/, '').trim().includes(nameL.replace(/\d+/, '').trim()) ||
-                    collectionNameL.replace(' ', '').includes(nameL.replace(' ', '')) ||
-                    collectionNameL.replace('-', '').includes(nameL.replace('-', ''))
+                const nameLower = name.toLowerCase()
+                const collectionNameLower = collectionName.toLowerCase()
+                const replacements = ['engine', /\d+/, ' ', '-']
+                if (collectionNameLower.includes(nameLower) ||
+                    replacements.some(r =>
+                        collectionNameLower.replace(r, '').trim().includes(nameLower.replace(r, '').trim())
+                    )
                 ) {
                     found = true
-                    insertLabel(id, collectionName)
-                    break
+                    mappedEngines.push([id, collectionName])
                 }
             }
             !found && notFound.add(name)
+        })
+
+        mappedEngines = mappedEngines
+            .filter(ar => { // remove Pygame if Renpy is present
+            const hasRenpyId = mappedEngines.some(([id]) => id === 584)
+            return !(hasRenpyId && ar[0] === 10845)
+        })
+
+        insertHeader('Engine')
+        for (const [id, collectionName] of mappedEngines) {
+            insertLabel(id, collectionName)
         }
         insertNotFound()
     }
