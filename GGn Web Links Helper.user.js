@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.13
+// @version      1.4.14
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -50,7 +50,7 @@ const reviewSites = [
 // site arrays: name, search url, input id, input pattern
 const commonSites = [
     ['Games Website', 'https://www.google.com/search?q=NAME%20official%20website', 'gameswebsiteuri', '.*'],
-    ['Wikipedia', 'https://en.wikipedia.org/w/index.php?search=NAME', 'wikipediauri', '^(https?:\\/\\/|)[a-z][a-z]\\.wikipedia\\.org\\/wiki\\/.*?$'],
+    ['Wikipedia', 'https://www.google.com/search?q=NAME site:wikipedia.org', 'wikipediauri', '^(https?:\\/\\/|)[a-z][a-z]\\.wikipedia\\.org\\/wiki\\/.*?$'],
     ['Amazon', 'https://www.google.com/search?q=site:amazon.*%20NAME', 'amazonuri', '^(https?:\\/\\/|)(www.|)amazon\\.(..|...|.....)\\/.*?$'],
 ]
 
@@ -675,14 +675,13 @@ function throwNotFound(items) {
 function searchSites(groupname, encodedGroupname) {
     searchAndAddElements('gameswebsiteuri', googleSearchSelector, `https://www.google.com/search?q=${encodedGroupname} -site:store.steampowered.com -site:steamcommunity.com -site:*.wikipedia.org`)
     searchAndAddElements('wikipediauri', (r, tr, ld) => {
-        const doc = parseDoc(r)
-        const el = doc.querySelector('.ib-video-game') ?? doc.querySelector('#mw-content-text a[href*=video_game]')
-        if (!el) {
-            throw Error('notfound', {cause: 'notfound'})
+        const query = r.response?.query
+        if (!query) throw Error('notfound', {cause: 'notfound'})
+        const pages = Object.values(query.pages).sort((a, b) => a.index - b.index) // sort by relevance
+        for (let i = 0; i < Math.min(max_results, pages.length); i++) {
+            setAnchorProperties(addElementsToRow(tr, ld, i), pages[i].title, pages[i].fullurl)
         }
-        setAnchorProperties(addElementsToRow(tr, ld),
-            el.href ? el.textContent : el.querySelector('th').textContent, el.href ? getFullURL(r, el) : r.finalUrl)
-    })
+    }, `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodedGroupname}&prop=info&inprop=url&format=json`, {responseType: "json"})
     searchAndAddElements('giantbomburi', ['li.media a', 'li.media a p.specs'])
     searchVNDB(groupname)
     searchHLTB(groupname)
