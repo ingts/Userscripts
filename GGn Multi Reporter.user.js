@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Multi Reporter
 // @namespace    none
-// @version      1
+// @version      2
 // @description  Report multiple torrents using the same details without going to the report page
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -110,6 +110,7 @@ function main(allPermalinks) {
                                     <option value="free">Freely Available</option>
                                     ${reportTypes.get(categoryid).map(i => `<option value="${i[0]}">${i[1]}</option>`)}
                                     ${categoryid === 4 ? '' : `<option value="unmark_trumpable">Unmark trumpable request</option>`}
+                                    <option value="banned">Specifically Banned</option>
                                     <option value="urgent">Urgent/malware</option>
                                     <option value="other">Other</option>
                                 </select>
