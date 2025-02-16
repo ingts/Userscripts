@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.7
+// @version      1.1.7.1
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -618,7 +618,7 @@ async function main() {
         [12520, "Colorblind Mode"],
     ])
 
-    // every franchise collection (as of 2024-09-01)
+    // every franchise collection
     const franchises = [
         [3, "Need for Speed "],
         [14, "Doom"],
@@ -1045,6 +1045,12 @@ async function main() {
         [12355, "Torrente"],
         [12399, "The Legend of Heroes"],
         [12406, "Umamusume Pretty Derby"],
+        [12454, "He-Man & The Masters of the Universe"],
+        [12478, "Until Dawn"],
+        [12535, "Starcom"],
+        [12545, "Sherlock Holmes"],
+        [12547, "Rampage"],
+        [12565, "Danganronpa"],
     ]
 
     // every engine collection
