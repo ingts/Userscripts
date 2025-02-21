@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GGn Collection Crawler
-// @version      1.1.7.1
+// @version      1.1.8
 // @description  Searches websites found in group page and lists possible collections from their info
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -89,7 +89,7 @@ if (location.href.includes('collections.php?id=') && GM_getValue('new_collection
     GM_deleteValue('new_collection')
 }
 
-if (location.hostname === "steamdb.info" && GM_getValue('check_steamdb', true)) {
+if (location.hostname === "steamdb.info" && GM_getValue('checking_steamdb', false)) {
     if (document.getElementById('info')) {
         const info = {}
         const techLink = document.querySelector('tr a[href="/tech/"]')
@@ -2270,12 +2270,12 @@ async function main() {
         }, `https://store.steampowered.com/api/appdetails?l=en&appids=${steamId}`, {responseType: "json"})
 
         if (check_SteamDB) {
+            GM_deleteValue('steamdb_info')
             promises.push(new Promise(resolve => {
-                GM_setValue('check_steamdb', 1)
+                GM_setValue('checking_steamdb', 1)
                 const tab = GM_openInTab(`https://steamdb.info/app/${steamId}/info`)
                 const listener = GM_addValueChangeListener('steamdb_info', (key, oldValue, newValue) => {
                     GM_removeValueChangeListener(listener)
-                    GM_deleteValue('check_steamdb')
                     tab.close()
                     const {tech, deckVerified, hasLinux} = newValue
                     if (deckVerified) { // only add if linux supported and on linux group or linux isn't supported and on windows group
@@ -2284,6 +2284,7 @@ async function main() {
                         } else if (platform === 'Windows') foundThemes.add(10563)
                     }
                     GM_deleteValue(key)
+                    GM_deleteValue('checking_steamdb')
                     resolve(1)
                     if (!tech) return
                     const engines = tech.filter(i => i.endsWith('Engine') || i.endsWith('Emulator')).map(i => i.replace('RenPy', "ren'py"))
@@ -2829,15 +2830,27 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
     foundPublishers.delete(null)
     foundPublishers.delete(undefined)
 
-    const suffixes = ["Inc", "LLC", "Ltd", "Co", "Corp", "Pvt", "PLC", "AG", "GmbH", "SA", "AB", "NV", "KG",
-        "OG", "EOOD", "SRL", "BV", "SL", "AS", "A/S", "Pty", "Ltda", "Sdn", "Bhd", "PT", "Pte", "Ltd", "LLP",
-        "LP", "SARL", "e.V", "SE", "Oy", "RF", "Lda", "SpA", "Kft", "Zrt", "AS", "d.o.o", "s.r.o", "o.o.",
-        "OOO", "A.D.", "JSC", "P.J.S.C", "S.A.B.", "C.V.", "S.A.P.I.", "de C.V.", "S. de R.L.", "de C.V.",
-        "S.A.P.I.", "B.V.", "N.V.", "S.A.", "S.C.A.", "S.C.R.L.", "S.C.S.", "S.N.C.", "intl", "international", "S.R.l"]
-    const suffixPattern = new RegExp(`,?\\s?(?:Co., Ltd|\\b(${suffixes.join("|")})\\b)\.?`, "i")
+    function standardise(set) {
+        const suffixes = ["Inc", "LLC", "Ltd", "Co", "Corp", "Pvt", "PLC", "AG", "GmbH", "SA", "AB", "NV", "KG",
+            "OG", "EOOD", "SRL", "BV", "SL", "AS", "A/S", "Pty", "Ltda", "Sdn", "Bhd", "PT", "Pte", "Ltd", "LLP",
+            "LP", "SARL", "e.V", "SE", "Oy", "RF", "Lda", "SpA", "Kft", "Zrt", "AS", "d.o.o", "s.r.o", "o.o.",
+            "OOO", "A.D.", "JSC", "P.J.S.C", "S.A.B.", "C.V.", "S.A.P.I.", "de C.V.", "S. de R.L.", "de C.V.",
+            "S.A.P.I.", "B.V.", "N.V.", "S.A.", "S.C.A.", "S.C.R.L.", "S.C.S.", "S.N.C.", "intl", "international", "S.R.l"]
+        const suffixPattern = new RegExp(`,?\\s?(?:Co., Ltd|\\b(${suffixes.join("|")})\\b)\.?`, "i")
 
-    foundDevelopers = new Set(Array.from(foundDevelopers, name => name.replace(suffixPattern, '').toLowerCase().trim()))
-    foundPublishers = new Set(Array.from(foundPublishers, name => name.replace(suffixPattern, '').toLowerCase().trim()))
+        const a = Array.from(set).reduce((acc, str) => { // have both versions when uppercase without space
+            acc.push(str)
+            if (/[a-z][A-Z]/.test(str)) {
+                const modifiedStr = str.replace(/([a-z])([A-Z])/g, '$1 $2');
+                acc.push(modifiedStr)
+            }
+            return acc;
+        }, []);
+        return new Set(a.map(name => name.replace(suffixPattern, '').toLowerCase().trim()))
+    }
+
+    foundDevelopers = standardise(foundDevelopers)
+    foundPublishers = standardise(foundPublishers)
     if (!groupIsAdult) {
         foundThemes.forEach(id => {
             if (adultThemes.has(id)) foundThemes.delete(id)
@@ -3000,7 +3013,7 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         await findCollections(devname, r => {
             r.forEach(({category, id, name}) => {
                 if (category === 'Publisher') {
-                    const index = foundPublishersArray.findIndex(p => p.startsWith(name.toLowerCase()))
+                    const index = foundPublishersArray.findIndex(p => p.replace(/ /g, '').startsWith(name))
                     if (index !== -1) {
                         foundPublishersArray.splice(index, 1)
                         publishers.push([id, name])
