@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.4.14
+// @version      1.5
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -40,75 +40,75 @@ const max_results = GM_getValue('max_results')
 const isEditPage = location.href.includes('editgroup')
 const default_unchecked = GM_getValue('default_unchecked')
 
-// review site arrays: name, search url, score input id, score input max, step, urlinputid
+// review site arrays: name, search url, score input id, score input max, step, urlinputid, input pattern (unofficial)
 const reviewSites = [
-    ["Metascore", "https://www.metacritic.com/search/NAME?category=13&page=1", "meta", "100", "1", "metauri"],
-    ["IGN", "https://www.google.com/search?q=site:ign.com/articles+NAME%20review", "ignscore", "10", "0.1", "ignuri"],
-    ["GameSpot", "https://www.gamespot.com/search/?i=reviews&q=NAME", "gamespotscore", "10", "0.1", "gamespotscoreuri"],
+    ["Metascore", "https://www.metacritic.com/search/NAME?category=13&page=1", "meta", "100", "1", "metauri", 'metacritic.com\/game\/.*\/critic-reviews\/.*'],
+    ["IGN", "https://www.google.com/search?q=site:ign.com/articles+NAME%20review", "ignscore", "10", "0.1", "ignuri", 'ign.com\/articles/\.*'],
+    ["GameSpot", "https://www.gamespot.com/search/?i=reviews&q=NAME", "gamespotscore", "10", "0.1", "gamespotscoreuri", 'gamespot.com\/reviews\/.*'],
 ]
 
 // site arrays: name, search url, input id, input pattern
 const commonSites = [
     ['Games Website', 'https://www.google.com/search?q=NAME%20official%20website', 'gameswebsiteuri', '.*'],
-    ['Wikipedia', 'https://www.google.com/search?q=NAME site:wikipedia.org', 'wikipediauri', '^(https?:\\/\\/|)[a-z][a-z]\\.wikipedia\\.org\\/wiki\\/.*?$'],
-    ['Amazon', 'https://www.google.com/search?q=site:amazon.*%20NAME', 'amazonuri', '^(https?:\\/\\/|)(www.|)amazon\\.(..|...|.....)\\/.*?$'],
+    ['Wikipedia', 'https://www.google.com/search?q=NAME site:wikipedia.org', 'wikipediauri', '^(https?:\/\/|)[a-z][a-z]\.wikipedia\.org\/wiki\/.*?$'],
+    ['Amazon', 'https://www.google.com/search?q=site:amazon.*%20NAME', 'amazonuri', '^(https?:\/\/|)(www.|)amazon\.(..|...|.....)\/.*?$'],
 ]
 
 const commonGameSites = [
-    ['Giantbomb', 'https://www.giantbomb.com/search/?i=game&q=NAME', 'giantbomburi', '^(https?:\\/\\/|)(www.|)giantbomb\\.com\\/.*?$'],
-    ['HowLongToBeat', 'https://howlongtobeat.com/?q=NAME', 'howlongtobeaturi', '^https:\\/\\/howlongtobeat\\.com\\/game\\/[0-9]*?$'],
+    ['Giantbomb', 'https://www.giantbomb.com/search/?i=game&q=NAME', 'giantbomburi', '^(https?:\/\/|)(www.|)giantbomb\.com\/.*?$'],
+    ['HowLongToBeat', 'https://howlongtobeat.com/?q=NAME', 'howlongtobeaturi', '^https:\/\/howlongtobeat\.com\/game\/[0-9]*?$'],
 ]
 
 const consoleAndPcSites = [
-    ['VNDB', 'https://vndb.org/v/all?sq=NAME', 'vndburi', '^(https?:\\/\\/|)(www.|)vndb.org\\/v[0-9]*?$'],
-    ['GameFAQs', 'https://gamefaqs.gamespot.com/search?game=NAME', 'gamefaqsuri', '^(https?:\\/\\/|)(www.|)gamefaqs\\.(gamespot.|)com\\/.*?$'],
-    ['Moby Games', 'https://www.mobygames.com/search/?q=NAME&type=game', 'mobygamesuri', '^(https?:\\/\\/|)(www.|)mobygames\\.com\\/(game|browse\\/games)\\/.*?$'],
+    ['VNDB', 'https://vndb.org/v/all?sq=NAME', 'vndburi', '^(https?:\/\/|)(www.|)vndb.org\/v[0-9]*?$'],
+    ['GameFAQs', 'https://gamefaqs.gamespot.com/search?game=NAME', 'gamefaqsuri', '^(https?:\/\/|)(www.|)gamefaqs\.(gamespot.|)com\/.*?$'],
+    ['Moby Games', 'https://www.mobygames.com/search/?q=NAME&type=game', 'mobygamesuri', '^(https?:\/\/|)(www.|)mobygames\.com\/(game|browse\/games)\/.*?$'],
 ]
 
 const commonPcSites = [
-    ['Steam', 'https://store.steampowered.com/search/?term=NAME&amp;category1=998&amp;ndl=1', 'steamuri', '^(https?:\\/\\/|)store\\.steampowered\\.com\\/(app|sub)\\/.*?$'],
-    ['GOG', 'https://www.gog.com/games?query=NAME', 'goguri', '^(https?:\\/\\/|)(www.|)gog\\.com\\/(en\\/)?game\\/.*?$'],
+    ['Steam', 'https://store.steampowered.com/search/?term=NAME&amp;category1=998&amp;ndl=1', 'steamuri', '^(https?:\/\/|)store\.steampowered\.com\/(app|sub)\/.*?$'],
+    ['GOG', 'https://www.gog.com/games?query=NAME', 'goguri', '^(https?:\/\/|)(www.|)gog\.com\/(en\/)?game\/.*?$'],
     ['Humble Bundle', 'https://www.humblebundle.com/store/search?search=NAME', 'humbleuri', '.*'],
-    ['PCGamingWiki', 'https://pcgamingwiki.com/w/index.php?search=NAME&fulltext=1', 'pcwikiuri', '^(https?:\\/\\/|)(www.|)pcgamingwiki\\.com\\/wiki\\/.*?$'],
+    ['PCGamingWiki', 'https://pcgamingwiki.com/w/index.php?search=NAME&fulltext=1', 'pcwikiuri', '^(https?:\/\/|)(www.|)pcgamingwiki\.com\/wiki\/.*?$'],
 ]
 
 const windowsAndMacSites = [
     ['Epic Games', 'https://www.epicgames.com/store/en-US/browse?q=NAME&sortBy=relevancy&category=Game',
-        'epicgamesuri', '^(https?:\\/\\/|)(www.|store.|)epicgames\\.com\\/(store\\/|)en-US\\/(p|product)\\/[a-z0-9\-]+(\\/home)?$'],
+        'epicgamesuri', '^(https?:\/\/|)(www.|store.|)epicgames\.com\/(store\/|)en-US\/(p|product)\/[a-z0-9\-]+(\/home)?$'],
 ]
 
 const windowsSites = [
-    ['Nexus Mods', 'https://www.nexusmods.com/search/?gsearch=NAME&gsearchtype=games&tab=games', 'nexusmodsuri', '^(http(s)?:\\/\\/|)(www.|)nexusmods\\.com\\/.*?$'],
+    ['Nexus Mods', 'https://www.nexusmods.com/search/?gsearch=NAME&gsearchtype=games&tab=games', 'nexusmodsuri', '^(http(s)?:\/\/|)(www.|)nexusmods\.com\/.*?$'],
 ]
 
 const macAndiOSSites = [
-    ['iTunes Store', 'https://www.google.com/search?q=site:apps.apple.com/*/NAME', 'itunesuri', '^(https?:\\/\\/|)(itunes|music|apps)\\.apple\\.com\\/.*?$']
+    ['iTunes Store', 'https://www.google.com/search?q=site:apps.apple.com/*/NAME', 'itunesuri', '^(https?:\/\/|)(itunes|music|apps)\.apple\.com\/.*?$']
 ]
 
 const androidSites = [
-    ['Google Play', 'https://play.google.com/store/search?q=NAME&c=apps', 'googleplayuri', '^(https?:\\/\\/|)play\\.google\\.com\\/store\\/apps\\/.*?$']
+    ['Google Play', 'https://play.google.com/store/search?q=NAME&c=apps', 'googleplayuri', '^(https?:\/\/|)play\.google\.com\/store\/apps\/.*?$']
 ]
 
 const pcAndPPrpgSites = [
-    ['Itch.io', 'https://itch.io/search?q=NAME', 'itchuri', '^(https?:\\/\\/|).*?\\.itch\\.io\\/.*?$'],
+    ['Itch.io', 'https://itch.io/search?q=NAME', 'itchuri', '^(https?:\/\/|).*?\.itch\.io\/.*?$'],
 ]
 
 const playstation4Sites = [
-    ['PSN', 'https://www.playstation.com/en-us/search/?q=NAME&category=games', 'psnuri', '^(https?:\\/\\/|)(www.|)(jp.|)(store.|)playstation\\.com\\/.*(games|title|[a-z][a-z]-[a-z][a-z]\\/product)\\/.*?$'],
+    ['PSN', 'https://www.playstation.com/en-us/search/?q=NAME&category=games', 'psnuri', '^(https?:\/\/|)(www.|)(jp.|)(store.|)playstation\.com\/.*(games|title|[a-z][a-z]-[a-z][a-z]\/product)\/.*?$'],
 ]
 
 const switchSites = [
-    ['Nintendo', 'https://www.nintendo.co.uk/Search/Search-299117.html?q=NAME', 'nintendouri', '^(https?:\\/\\/|)(www.|ec.|store-jp.)nintendo\\.(com|co\\.uk|co\\.jp)\\/.*[a-zA-Z0-9-]+(\\.html)?\\/?$'],
+    ['Nintendo', 'https://www.nintendo.co.uk/Search/Search-299117.html?q=NAME', 'nintendouri', '^(https?:\/\/|)(www.|ec.|store-jp.)nintendo\.(com|co\.uk|co\.jp)\/.*[a-zA-Z0-9-]+(\.html)?\/?$'],
 ]
 
 const PPrpgSites = [
-    ['RPGGeek', 'https://rpggeek.com/geeksearch.php?action=search&objecttype=rpg&q=NAME', 'rpggeekuri', '^(https?:\\/\\/|)(www.|)rpggeek\\.com\\/rpg[A-Za-z]*?\\/.*?$'],
-    ['RPG.net', 'https://index.rpg.net/display-search.phtml?key=title&value=NAME', 'rpgneturi', '^(https?:\\/\\/|)index\\.rpg\\.net\\/display-entry\\.phtml\\?mainid\\=[0-9]*?$'],
-    ['DriveThruRPG', 'https://drivethrurpg.com/browse.php?keywords=NAME', 'drivethrurpguri', '^(https?:\\/\\/|)(www.|)drivethrurpg\\.com\\/product\\/[0-9]*?\\/.*?$'],
+    ['RPGGeek', 'https://rpggeek.com/geeksearch.php?action=search&objecttype=rpg&q=NAME', 'rpggeekuri', '^(https?:\/\/|)(www.|)rpggeek\.com\/rpg[A-Za-z]*?\/.*?$'],
+    ['RPG.net', 'https://index.rpg.net/display-search.phtml?key=title&value=NAME', 'rpgneturi', '^(https?:\/\/|)index\.rpg\.net\/display-entry\.phtml\?mainid\=[0-9]*?$'],
+    ['DriveThruRPG', 'https://drivethrurpg.com/browse.php?keywords=NAME', 'drivethrurpguri', '^(https?:\/\/|)(www.|)drivethrurpg\.com\/product\/[0-9]*?\/.*?$'],
 ]
 
 const boardGameSites = [
-    ['BoardGameGeek', 'https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=NAME', 'boardgamegeekuri', '^(https?:\\/\\/|)(www.|)boardgamegeek\\.com\\/boardgame\\/.*?$'],
+    ['BoardGameGeek', 'https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=NAME', 'boardgamegeekuri', '^(https?:\/\/|)(www.|)boardgamegeek\.com\/boardgame\/.*?$'],
 ]
 
 const ostSites = [
@@ -311,7 +311,7 @@ async function runGroup() {
     setAlternateNames(groupname)
 
     if (platform) {
-        reviewSites.forEach(([name, searchurl, scoreinputid, scoreinputmax, step, urlinputid]) => {
+        reviewSites.forEach(([name, searchurl, scoreinputid, scoreinputmax, step, urlinputid, pattern]) => {
             const ratingDiv = document.querySelector(`.ratings.${scoreinputid.replace('score', '')}`)
             reviewsBody.insertAdjacentHTML('beforeend',
                 // language=HTML
@@ -325,7 +325,7 @@ async function runGroup() {
                                    step=${step} value=${ratingDiv?.firstElementChild.textContent ?? ''}>
                             / ${scoreinputmax}
                             <input type="url" id=${urlinputid} name=${urlinputid}
-                                   value=${ratingDiv?.parentElement.href ?? ''}>
+                                   value=${ratingDiv?.parentElement.href.replace('http:', 'https:') ?? ''} pattern=${pattern}>
                         </td>
                     </tr>
                 `)
@@ -345,6 +345,7 @@ async function runGroup() {
                 encodeURIComponent(groupname.replace(/\b([IVX])(X{0,3}I{0,3}|X{0,2}VI{0,3}|X{0,2}I?[VX])(?![A-Za-z'])\b/, '').trim()) // nexus mods search is too strict
                 : encodedGroupname)
 
+            const href = document.querySelector(`a[title=${sel}]`)?.href ?? ''
             linksBody.insertAdjacentHTML('beforeend',
                 // language=HTML
                 `
@@ -355,7 +356,7 @@ async function runGroup() {
                         </td>
                         <td style="width: 100%;">
                             <input type="url" id=${id} name=${id} ${pattern ? `pattern=${pattern}` : ''} title=${sel}
-                                   value=${(document.querySelector(`a[title=${sel}]`) ?? '')}>
+                                   value=${id === 'gameswebsiteuri' ? href : href.replace('http:', 'https:')}>
                         </td>
                     </tr>
                 `)
@@ -531,12 +532,13 @@ function addSubmitHandler(form, groupTitleParts) {
         for (const tr of linksTable.children) {
             const urlInput = tr.querySelector('input[type=url]')
             const checked = tr.querySelector('input:checked')
-            if (!urlInput.value && checked) {
+            if (checked) {
+                const url = checked.previousElementSibling.href
                 if (urlInput.id === 'gamefaqsuri') {
-                    p.push(findGameFaqsPlatformPage(checked.previousElementSibling.href, platform, urlInput))
+                    p.push(findGameFaqsPlatformPage(url, platform, urlInput))
                     continue
                 }
-                urlInput.value = checked.previousElementSibling.href
+                urlInput.value = url
             }
             if (!isEditPage && urlInput.value && !document.querySelector(`a[title=${urlInput.title}]`)) // for Collection Crawler to find
                 document.body.insertAdjacentHTML('beforeend', `<a href=${urlInput.value} title=${urlInput.title} style="display:none;"></a>`)
@@ -645,12 +647,26 @@ function insertAdultPresentText(reviewsBody) {
     reviewsBody.insertAdjacentHTML('afterend', `<p style="color:antiquewhite;">Group is tagged adult: skipped searching reviews</p>`)
 }
 
+/**
+ * @param {NodeList|Array} items
+ * @param {string} [key]
+ */
+function throwNotFound(items, key) {
+    if (!items || items.length < 1) throw Error('notfound', {cause: 'notfound'})
+
+    if (GM_getValue('check_first_word')) {
+        items.length = Math.min(max_results, items.length)
+        if (Array.from(items).every(item => !(item?.textContent ?? (key ? item[key] : item)).includes(groupnameFirstWord))) {
+            throw Error('notfound', {cause: 'notfound'})
+        }
+    }
+}
+
 function searchReviews() {
     searchAndAddElements('metauri', (r, tr, ld) => {
-        const data = r.response.data
-        if (data.totalResults < 1) throw Error('notfound', {cause: 'notfound'})
+        const ratedGames = r.response.data.items.filter(i => i.criticScoreSummary.score)
+        throwNotFound(ratedGames, 'title')
 
-        const ratedGames = data.items.filter(i => i.criticScoreSummary.score)
         for (let i = 0; i < Math.min(max_results, ratedGames.length); i++) {
             const {criticScoreSummary: {score}, title, slug} = ratedGames[i]
             setAnchorProperties(addElementsToRow(tr, ld, i), `${title} (${score})`, `https://www.metacritic.com/game/${slug}`)
@@ -661,23 +677,13 @@ function searchReviews() {
     searchAndAddElements('gamespotscoreuri', '#js-sort-filter-results span > a')
 }
 
-function throwNotFound(items) {
-    if (!items || items.length < 1) throw Error('notfound', {cause: 'notfound'})
-
-    if (GM_getValue('check_first_word')) {
-        items.length = Math.min(max_results, items.length)
-        if (Array.from(items).every(item => !(item?.textContent ?? item).includes(groupnameFirstWord))) {
-            throw Error('notfound', {cause: 'notfound'})
-        }
-    }
-}
-
 function searchSites(groupname, encodedGroupname) {
     searchAndAddElements('gameswebsiteuri', googleSearchSelector, `https://www.google.com/search?q=${encodedGroupname} -site:store.steampowered.com -site:steamcommunity.com -site:*.wikipedia.org`)
     searchAndAddElements('wikipediauri', (r, tr, ld) => {
         const query = r.response?.query
-        if (!query) throw Error('notfound', {cause: 'notfound'})
+        throwNotFound(query)
         const pages = Object.values(query.pages).sort((a, b) => a.index - b.index) // sort by relevance
+        throwNotFound(pages, 'title')
         for (let i = 0; i < Math.min(max_results, pages.length); i++) {
             setAnchorProperties(addElementsToRow(tr, ld, i), pages[i].title, pages[i].fullurl)
         }
@@ -701,10 +707,18 @@ function searchSites(groupname, encodedGroupname) {
             setAnchorProperties(addElementsToRow(tr, ld, i), `${findTextNode(anchors[i])}, ${years[i].textContent}`, anchors[i].href)
         }
     })
-    searchAndAddElements('goguri', ['.paginated-products-grid a', 'product-title'])
+    searchAndAddElements('goguri', (r, tr, ld) => {
+        const products = r.response.products
+        throwNotFound(products, 'title')
+        for (let i = 0; i < Math.min(max_results, products.length); i++) {
+            setAnchorProperties(addElementsToRow(tr, ld, i), products[i].title, products[i].storeLink)
+        }
+    }, `https://catalog.gog.com/v1/catalog?limit=${max_results}&query=like%3A${encodedGroupname}&systems=${platform === 'Mac' ? 'osx' : platform.toLowerCase()}&productType=in%3Agame`,
+        {responseType: "json"})
+
     searchAndAddElements('humbleuri', (r, tr, ld) => {
         const results = r.response.results
-        if (results.length < 1) throw Error('notfound', {cause: 'notfound'})
+        throwNotFound(results, 'human_name')
         for (let i = 0; i < Math.min(max_results, results.length); i++) {
             setAnchorProperties(addElementsToRow(tr, ld, i), results[i].human_name, `https://www.humblebundle.com/store/${results[i].human_url}`)
         }
@@ -742,7 +756,8 @@ function searchSites(groupname, encodedGroupname) {
                 getFullURL(r, anchors[i]))
         }
     })
-    searchAndAddElements('nintendouri', googleSearchSelector, `https://www.google.com/search?q=site:*nintendo.com OR site:*nintendo.co.uk OR site:*nintendo.co.jp AND inurl:JP OR inurl:ja OR inurl:Games OR inurl:games OR inurl:list ${encodedGroupname}`)
+    searchAndAddElements('nintendouri', googleSearchSelector,
+        `https://www.google.com/search?q=site:*nintendo.com OR site:*nintendo.co.uk OR site:*nintendo.co.jp AND inurl:JP OR inurl:ja OR inurl:Games OR inurl:games OR inurl:list ${encodedGroupname}`)
 
     searchAndAddElements('rpggeekuri', 'a.primary')
     searchAndAddElements('rpgneturi', 'a[href*=mainid')
@@ -838,7 +853,7 @@ function searchHLTB(groupname) {
                 if (r.status === 404) throw Error('endpoint changed')
                 if (r.status !== 200) throw Error
                 const data = r.response.data
-                if (data.length < 1) throw Error('notfound', {cause: 'notfound'})
+                throwNotFound(data, 'game_name')
                 for (let i = 0; i < Math.min(max_results, data.length); i++) {
                     const {game_id, game_name} = data[i]
                     setAnchorProperties(addElementsToRow(tr, loading, i), game_name, `https://howlongtobeat.com/game/${game_id}`)
@@ -877,7 +892,7 @@ async function searchVNDB(groupname) {
                 const results = r.response.results
                 if (results.length < 1) {
                     resolve(1)
-                    throw Error('notfound', {cause: 'notfound'})
+                    throwNotFound(results, 'title')
                 }
                 found = true
                 results.forEach(({
@@ -1057,7 +1072,12 @@ function addElementsToRow(tr, loading, index) {
 
 function addLoadingToRow(id) {
     const tr = document.getElementById(id)?.closest('tr')
-    if (!tr || tr.querySelector('input[type=url]').value) return []
+    if (!tr) return []
+    const urlInput = tr.querySelector('input[type=url]')
+    const matchesPattern = urlInput.pattern && new RegExp(urlInput.pattern).test(urlInput.value)
+    if (matchesPattern) return []
+    if (urlInput.value) tr.style.outline = '1px solid orange'
+
     const loading = document.createElement('span')
     loading.textContent = 'Loading'
     loading.className = 'loading'
