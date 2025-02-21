@@ -134,13 +134,13 @@ async function main() {
                 padding: 0;
                 grid-column: span ${GM_getValue('columns')};
             }
-            
+
             #cc h3 span {
                 font-size: 0.8rem;
                 color: #c9aadf;
                 font-weight: normal;
             }
-            
+
             #cc h3 span.comma {
                 font-size: 0.8rem;
                 color: unset;
@@ -167,7 +167,8 @@ async function main() {
                 <div class="head" style="width: 100%;">
                     Collection Crawler
                 </div>
-                <div id="cc-content" style="display: grid;grid-template-columns: repeat(${GM_getValue('columns')}, 1fr);row-gap: 6px"></div>
+                <div id="cc-content"
+                     style="display: grid;grid-template-columns: repeat(${GM_getValue('columns')}, 1fr);row-gap: 6px"></div>
                 <h3 id="cc-loading">Loading</h3>
             </section>
         `)
@@ -1449,7 +1450,7 @@ async function main() {
         [46, 11769], // Harem
         [444, 11770], // Time Stopping
         [533, 11801], // Battle Fuck
-        [519 ,10392], // 異世界転生
+        [519, 10392], // 異世界転生
     ])
 
     const DlsiteThemesExtra = new Map([
@@ -2441,6 +2442,7 @@ async function main() {
                 ["SNK Neo Geo Pocket", "Neo Geo Pocket"],
             ])
             addCollectionIds(tags, mobygamesThemes, foundThemes)
+
             function addDevsPubs(list, addTo) {
                 list.forEach(a => {
                     const platforms = JSON.parse(a.dataset?.popover)?.platforms
@@ -2452,6 +2454,7 @@ async function main() {
                         addTo.add(a.textContent)
                 })
             }
+
             addDevsPubs(doc.querySelectorAll('#developerLinks a'), foundDevelopers)
             addDevsPubs(doc.querySelectorAll('#publisherLinks a'), foundPublishers)
             let groups = Array.from(doc.querySelectorAll('.badge.text-ellipsis a'))
@@ -2717,7 +2720,15 @@ async function main() {
 
             processURL("VNDB", r => {
                     let adult
-                    for (const {engine, languages, official, producers, has_ero, uncensored, released} of r.response.results) {
+                    for (const {
+                        engine,
+                        languages,
+                        official,
+                        producers,
+                        has_ero,
+                        uncensored,
+                        released
+                    } of r.response.results) {
                         foundEngines.add(engine)
                         if (uncensored) foundThemes.add(4138) // Uncensored Games
                         if (has_ero) adult = true
@@ -2780,7 +2791,7 @@ async function main() {
         if (extra) {
             Array.from(extra).forEach((name, index) => {
                 header.insertAdjacentHTML('beforeend', `<span>${name}</span>${index !== extra.size - 1 ?
-                    "<span class='comma'>, </span>": ''}`)
+                    "<span class='comma'>, </span>" : ''}`)
             })
         }
         content.append(header)
@@ -2841,11 +2852,11 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
         const a = Array.from(set).reduce((acc, str) => { // have both versions when uppercase without space
             acc.push(str)
             if (/[a-z][A-Z]/.test(str)) {
-                const modifiedStr = str.replace(/([a-z])([A-Z])/g, '$1 $2');
+                const modifiedStr = str.replace(/([a-z])([A-Z])/g, '$1 $2')
                 acc.push(modifiedStr)
             }
-            return acc;
-        }, []);
+            return acc
+        }, [])
         return new Set(a.map(name => name.replace(suffixPattern, '').toLowerCase().trim()))
     }
 
@@ -2965,9 +2976,9 @@ ${isExisting ? '' : `<input type="checkbox" ${uncheckSet.has(id) ? '' : 'checked
 
         mappedEngines = mappedEngines
             .filter(ar => { // remove Pygame if Renpy is present
-            const hasRenpyId = mappedEngines.some(([id]) => id === 584)
-            return !(hasRenpyId && ar[0] === 10845)
-        })
+                const hasRenpyId = mappedEngines.some(([id]) => id === 584)
+                return !(hasRenpyId && ar[0] === 10845)
+            })
 
         insertHeader('Engine')
         for (const [id, collectionName] of mappedEngines) {
