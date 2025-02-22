@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.5
+// @version      1.5.1
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -324,8 +324,8 @@ async function runGroup() {
                             <input type="number" id=${scoreinputid} name=${scoreinputid} min="0" max=${scoreinputmax}
                                    step=${step} value=${ratingDiv?.firstElementChild.textContent ?? ''}>
                             / ${scoreinputmax}
-                            <input type="url" id=${urlinputid} name=${urlinputid}
-                                   value=${ratingDiv?.parentElement.href.replace('http:', 'https:') ?? ''} pattern=${pattern}>
+                            <input type="url" id=${urlinputid} name=${urlinputid} pattern=${pattern}
+                                   value=${ratingDiv?.parentElement.href.replace('http:', 'https:') ?? ''}>
                         </td>
                     </tr>
                 `)
@@ -1076,7 +1076,7 @@ function addLoadingToRow(id) {
     const urlInput = tr.querySelector('input[type=url]')
     const matchesPattern = urlInput.pattern && new RegExp(urlInput.pattern).test(urlInput.value)
     if (matchesPattern) return []
-    if (urlInput.value) tr.style.outline = '1px solid orange'
+    if (urlInput.value) urlInput.style.outline = '1px solid orange'
 
     const loading = document.createElement('span')
     loading.textContent = 'Loading'
