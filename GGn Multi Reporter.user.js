@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Multi Reporter
 // @namespace    none
-// @version      2
+// @version      3
 // @description  Report multiple torrents using the same details without going to the report page
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -53,18 +53,12 @@ if (groupDetails) {
 }
 
 function main(allPermalinks) {
-    let categoryid = 1
-
-    const curlinkedgroup = document.getElementById('curlinkedgroup')
-    if (!curlinkedgroup.className) categoryid = 2
-    else switch (curlinkedgroup.className) {
-        case 'cats_ebooks':
-            categoryid = 3
-            break
-        case 'cats_ost':
-            categoryid = 4
-            break
-    }
+    const categoryid = new Map([
+        ["Game Information", 1],
+        ["Application Information", 2],
+        ["E-Book Information", 3],
+        ["OST Information", 4]
+    ]).get(document.querySelector("#group_nofo_bigdiv > div.head > strong").textContent.trim())
 
     const reportTypes = new Map([
         [1, [['wrong_language', 'Wrong language(s) specified/listed'],
