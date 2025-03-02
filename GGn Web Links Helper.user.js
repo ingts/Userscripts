@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
-// @version      1.5.1
+ // @version      1.5.2
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -68,7 +68,7 @@ const consoleAndPcSites = [
 const commonPcSites = [
     ['Steam', 'https://store.steampowered.com/search/?term=NAME&amp;category1=998&amp;ndl=1', 'steamuri', '^(https?:\/\/|)store\.steampowered\.com\/(app|sub)\/.*?$'],
     ['GOG', 'https://www.gog.com/games?query=NAME', 'goguri', '^(https?:\/\/|)(www.|)gog\.com\/(en\/)?game\/.*?$'],
-    ['Humble Bundle', 'https://www.humblebundle.com/store/search?search=NAME', 'humbleuri', '.*'],
+    ['Humble Bundle', 'https://www.humblebundle.com/store/search?search=NAME', 'humbleuri', 'humblebundle.com\/store\/.*'],
     ['PCGamingWiki', 'https://pcgamingwiki.com/w/index.php?search=NAME&fulltext=1', 'pcwikiuri', '^(https?:\/\/|)(www.|)pcgamingwiki\.com\/wiki\/.*?$'],
 ]
 
@@ -656,7 +656,8 @@ function throwNotFound(items, key) {
 
     if (GM_getValue('check_first_word')) {
         items.length = Math.min(max_results, items.length)
-        if (Array.from(items).every(item => !(item?.textContent ?? (key ? item[key] : item)).includes(groupnameFirstWord))) {
+        const lower = groupnameFirstWord.toLowerCase()
+        if (Array.from(items).every(item => !(item?.textContent?.toLowerCase() ?? (key ? item[key].toLowerCase() : item.toLowerCase())).startsWith(lower))) {
             throw Error('notfound', {cause: 'notfound'})
         }
     }
@@ -674,7 +675,21 @@ function searchReviews() {
     }, `https://backend.metacritic.com/v1/xapi/finder/metacritic/search/${encodedGroupname}/web?apiKey=1MOZgmNFxvmljaQR1X9KAij9Mo4xAY3u&mcoTypeId=13&limit=10`, {responseType: "json"})
 
     searchAndAddElements('ignuri', googleSearchSelector)
-    searchAndAddElements('gamespotscoreuri', '#js-sort-filter-results span > a')
+    searchAndAddElements('gamespotscoreuri', (r, tr, ld) => {
+        const results = r.response.results.filter(i => i.typeName === 'Review')
+        throwNotFound(results, 'title')
+        for (let i = 0; i < Math.min(max_results, results.length); i++) {
+            const {title, dateDisplay, url} = results[i]
+            setAnchorProperties(addElementsToRow(tr, ld, i), `${title} (${dateDisplay})`, `https://www.gamespot.com${url}`)
+        }
+    }, `https://www.gamespot.com/jsonsearch/?header=1&i=reviews&module=autocomplete&q=${encodedGroupname}`, {
+        headers: {
+            referer: 'https://www.gamespot.com/',
+            'Content-Type': 'application/json',
+            'x-requested-with': 'XMLHttpRequest'
+        },
+        responseType: "json",
+    })
 }
 
 function searchSites(groupname, encodedGroupname) {
@@ -1074,9 +1089,10 @@ function addLoadingToRow(id) {
     const tr = document.getElementById(id)?.closest('tr')
     if (!tr) return []
     const urlInput = tr.querySelector('input[type=url]')
-    const matchesPattern = urlInput.pattern && new RegExp(urlInput.pattern).test(urlInput.value)
-    if (matchesPattern) return []
-    if (urlInput.value) urlInput.style.outline = '1px solid orange'
+    if (urlInput.value && urlInput.pattern) {
+        if (new RegExp(urlInput.pattern).test(urlInput.value)) return []
+        urlInput.style.outline = '1px solid orange'
+    }
 
     const loading = document.createElement('span')
     loading.textContent = 'Loading'
