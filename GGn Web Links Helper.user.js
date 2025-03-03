@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
- // @version      1.5.2
+ // @version     1.5.3
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -657,7 +657,7 @@ function throwNotFound(items, key) {
     if (GM_getValue('check_first_word')) {
         items.length = Math.min(max_results, items.length)
         const lower = groupnameFirstWord.toLowerCase()
-        if (Array.from(items).every(item => !(item?.textContent?.toLowerCase() ?? (key ? item[key].toLowerCase() : item.toLowerCase())).startsWith(lower))) {
+        if (Array.from(items).every(item => !(item?.textContent?.toLowerCase().trim() ?? (key ? item[key].toLowerCase() : item.toLowerCase())).startsWith(lower))) {
             throw Error('notfound', {cause: 'notfound'})
         }
     }
@@ -713,9 +713,8 @@ function searchSites(groupname, encodedGroupname) {
 
     searchAndAddElements('steamuri', (r, tr, ld) => {
         const doc = parseDoc(r)
-        const nodeList = doc.querySelectorAll('#search_result_container a')
-        throwNotFound(nodeList)
-        const anchors = Array.from(nodeList)
+        const anchors = Array.from(doc.querySelectorAll('#search_result_container a'))
+        throwNotFound(anchors)
         anchors.forEach(anchor => anchor.href = /.*\/app\/\d+\//.exec(anchor.href)?.[0] ?? anchor.href) // don't want stuff after the number
         const years = doc.querySelectorAll('.col.search_released.responsive_secondrow')
         for (let i = 0; i < Math.min(max_results, anchors.length); i++) {
