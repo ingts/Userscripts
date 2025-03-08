@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Web Links Helper
 // @namespace    none
- // @version     1.5.3
+ // @version     1.5.4
 // @description  Adds buttons that enables editing web links from the group page and to auto search for links
 // @author       ingts
 // @match        https://gazellegames.net/torrents.php?id=*
@@ -42,9 +42,9 @@ const default_unchecked = GM_getValue('default_unchecked')
 
 // review site arrays: name, search url, score input id, score input max, step, urlinputid, input pattern (unofficial)
 const reviewSites = [
-    ["Metascore", "https://www.metacritic.com/search/NAME?category=13&page=1", "meta", "100", "1", "metauri", 'metacritic.com\/game\/.*\/critic-reviews\/.*'],
-    ["IGN", "https://www.google.com/search?q=site:ign.com/articles+NAME%20review", "ignscore", "10", "0.1", "ignuri", 'ign.com\/articles/\.*'],
-    ["GameSpot", "https://www.gamespot.com/search/?i=reviews&q=NAME", "gamespotscore", "10", "0.1", "gamespotscoreuri", 'gamespot.com\/reviews\/.*'],
+    ["Metascore", "https://www.metacritic.com/search/NAME?category=13&page=1", "meta", "100", "1", "metauri", '.*metacritic.com\/game\/.*\/critic-reviews\/.*'],
+    ["IGN", "https://www.google.com/search?q=site:ign.com/articles+NAME%20review", "ignscore", "10", "0.1", "ignuri", '.*ign.com\/articles/\.*'],
+    ["GameSpot", "https://www.gamespot.com/search/?i=reviews&q=NAME", "gamespotscore", "10", "0.1", "gamespotscoreuri", '.*gamespot.com\/reviews\/.*'],
 ]
 
 // site arrays: name, search url, input id, input pattern
@@ -68,7 +68,7 @@ const consoleAndPcSites = [
 const commonPcSites = [
     ['Steam', 'https://store.steampowered.com/search/?term=NAME&amp;category1=998&amp;ndl=1', 'steamuri', '^(https?:\/\/|)store\.steampowered\.com\/(app|sub)\/.*?$'],
     ['GOG', 'https://www.gog.com/games?query=NAME', 'goguri', '^(https?:\/\/|)(www.|)gog\.com\/(en\/)?game\/.*?$'],
-    ['Humble Bundle', 'https://www.humblebundle.com/store/search?search=NAME', 'humbleuri', 'humblebundle.com\/store\/.*'],
+    ['Humble Bundle', 'https://www.humblebundle.com/store/search?search=NAME', 'humbleuri', '.*humblebundle.com\/store\/.*'],
     ['PCGamingWiki', 'https://pcgamingwiki.com/w/index.php?search=NAME&fulltext=1', 'pcwikiuri', '^(https?:\/\/|)(www.|)pcgamingwiki\.com\/wiki\/.*?$'],
 ]
 
