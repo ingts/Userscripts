@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Steam Uploady (edited)
 // @namespace    https://gazellegames.net/
-// @version      18
+// @version      19
 // @description  Fill upload form with Steam info. Edited from "GGn New Uploady"
 // @author       NeutronNoir, ZeDoCaixao, ingts
 // @match        https://gazellegames.net/upload.php*
@@ -155,7 +155,6 @@ function html2bb(str) {
     str = str.replace(/  +/g, " ")
     str = str.replace(/\n +/g, "\n")
     str = str.replace(/\n\n\n+/gm, "\n\n")
-    str = str.replace(/\n\n\n+/gm, "\n\n")
     str = str.replace(/\[\/b]\[\/u]\[\/align]\n\n/g, "[/b][/u][/align]\n")
     str = str.replace(/\n\n\[\*]/g, "\n[*]")
     str = str.replace(/< *img.*?>/g, "\n")
@@ -186,6 +185,11 @@ function pretty_sr(str) {
     str = str.replace(/:\n/g, "\n")
     str = str.replace(/:\[\/b]\n/g, "[/b]\n")
     str = str.replace(/\n\n\[b]/g, "\n[b]")
+    str = str.replace(/\[\*]Requires a 64-bit processor and operating system\n(.*)/g, (match, p1) => {
+        if (p1.includes('64')) return p1
+        return `${p1} (64-bit)`
+    })
+    str = str.replace(/([a-zA-Z])(\d)/g, '$1 $2')
     return str
 }
 
@@ -233,7 +237,7 @@ function formatAbout(about) {
     })
 
     // Replace different list symbols at the start with [*]
-    about = about.replace(/^[-•◦]\s*/gm, '[*]')
+    about = about.replace(/^[-•◦■・]\s*/gm, '[*]')
 
     // If a line starts with [u], [i], or [b] and it is not the only text on that line, add [*] at the start and replace tags with [b]
     about = about.replace(/^(\[b]|\[u]|\[i])*(.*?)(\[\/b]|\[\/u]|\[\/i])+(.*$)/gm, (match, p1, p2, p3, p4) => {
@@ -397,13 +401,16 @@ function fill_form(response) {
             recfield = gameInfo.mac_requirements
             break
     }
-    let sr = ''
-    if (typeof (recfield.minimum) !== "undefined") {
-        sr += html2bb(recfield.minimum)
+
+    const minimum = recfield.minimum
+    const recommended = recfield.recommended
+    let sr = html2bb(minimum)
+    if (recommended && !recommended.includes("Requires a 64-bit processor and operating system<\/li><\/ul>")) { // only 1 line
+        sr += '\n' + html2bb(recommended)
+    } else {
+        sr = sr.replace('[b]Minimum[/b]\n', '')
     }
-    if (typeof (recfield.recommended) !== "undefined") {
-        sr += "\n" + html2bb(recfield.recommended)
-    }
+
     sr = "\n\n[quote][align=center][b][u]System Requirements[/u][/b][/align]\n\n" +
         pretty_sr(sr) +
         "[/quote]"
